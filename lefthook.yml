@@ -1,0 +1,10 @@
+pre-commit:
+  commands:
+    check:
+      run: pnpm lint --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
+      stage_fixed: true
+
+pre-push:
+  commands:
+    check:
+      run: pnpm lint --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {push_files}
