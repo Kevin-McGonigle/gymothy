@@ -1,0 +1,447 @@
+{
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "category": "Project Hygiene & AI Context",
+      "description": "Configure foundational documentation and minimal AI agent instructions.",
+      "acceptance_criteria": [
+        "README.md exists at project root.",
+        "README.md contains project name 'Gymothy'.",
+        "README.md contains a clear value proposition.",
+        "README.md contains developer setup instructions for pnpm.",
+        "AGENTS.md exists at project root.",
+        "AGENTS.md describes 'Focus Mode' architecture.",
+        "AGENTS.md describes 'Exercise Shadowing' strategy.",
+        "AGENTS.md specifies Vitest + RTL as testing requirements.",
+        "CLAUDE.md exists as a symlink to AGENTS.md.",
+        "All boilerplate example code is removed from the app directory."
+      ],
+      "dependencies": [],
+      "completed": true
+    },
+    {
+      "id": "TASK-002",
+      "category": "Database Infrastructure",
+      "description": "Set up Turso database with Drizzle ORM and implement the core schema.",
+      "acceptance_criteria": [
+        "Drizzle ORM and @libsql/client are installed.",
+        "Drizzle-kit is installed as a dev dependency.",
+        "lib/db/schema.ts defines User table.",
+        "lib/db/schema.ts defines Exercise table with external_id and user_id.",
+        "lib/db/schema.ts defines Workout table.",
+        "lib/db/schema.ts defines WorkoutExerciseGroup table.",
+        "lib/db/schema.ts defines WorkoutExercise table.",
+        "lib/db/schema.ts defines WorkoutSet table.",
+        "lib/db/schema.ts defines feedback enum ('too_easy', 'solid', 'struggle', 'failure').",
+        "lib/db/schema.ts defines Routine, RoutineGroup, RoutineExercise, and RoutineSet tables.",
+        "drizzle.config.ts is configured for libsql.",
+        "pnpm drizzle-kit generate creates migration files.",
+        "pnpm drizzle-kit push succeeds against local SQLite file."
+      ],
+      "dependencies": ["TASK-001"],
+      "completed": false
+    },
+    {
+      "id": "TASK-003",
+      "category": "Authentication Setup",
+      "description": "Implement Better Auth with Email/Password provider and Drizzle adapter.",
+      "acceptance_criteria": [
+        "better-auth and @better-auth/drizzle-adapter are installed.",
+        "lib/auth.ts initialized with Drizzle adapter.",
+        "emailAndPassword provider enabled in lib/auth.ts.",
+        "app/api/auth/[...all]/route.ts handler exists.",
+        "middleware.ts protects private routes (History, Routines, Workout).",
+        "Better Auth schema successfully generated via CLI.",
+        "Endpoint /api/auth/ok returns {status: 'ok'}.",
+        ".env.example contains BETTER_AUTH_SECRET.",
+        ".env.example contains BETTER_AUTH_URL."
+      ],
+      "dependencies": ["TASK-002"],
+      "completed": false
+    },
+    {
+      "id": "TASK-004",
+      "category": "Testing Infrastructure",
+      "description": "Configure Vitest and React Testing Library for automated verification.",
+      "acceptance_criteria": [
+        "vitest and @testing-library/react are installed.",
+        "vitest.config.ts is correctly configured for Next.js.",
+        "tests/setup.ts exists.",
+        "tests/setup.ts handles JSDOM global setup.",
+        "tests/setup.ts handles React Testing Library cleanup.",
+        "pnpm test command executes test suite.",
+        "Dummy unit test passes.",
+        "Dummy component test passes."
+      ],
+      "dependencies": ["TASK-001"],
+      "completed": false
+    },
+    {
+      "id": "TASK-005",
+      "category": "Deployment Setup",
+      "description": "Configure the project for Vercel deployment.",
+      "acceptance_criteria": [
+        "pnpm build succeeds locally without lint/type errors.",
+        "next.config.ts defaults are appropriate for Vercel.",
+        ".env.example includes all keys required for production.",
+        "Application landing page loads on Vercel deployment URL."
+      ],
+      "dependencies": ["TASK-003", "TASK-004"],
+      "completed": false
+    },
+    {
+      "id": "TASK-006",
+      "category": "Exercise Library - API Integration",
+      "description": "Integrate ExerciseDB API with MSW mocking for testing.",
+      "acceptance_criteria": [
+        "msw is installed.",
+        "tests/mocks/handlers.ts defines ExerciseDB mock responses.",
+        "tests/mocks/server.ts configures MSW for Node.",
+        "Service/hook for fetching ExerciseDB data exists.",
+        "API fetching handles non-200 status codes.",
+        "API fetching handles network timeouts.",
+        "Unit tests for fetching logic pass with MSW."
+      ],
+      "dependencies": ["TASK-004"],
+      "completed": false
+    },
+    {
+      "id": "TASK-007",
+      "category": "Exercise Library - UI Components",
+      "description": "Build mobile-optimized UI components for browsing exercises.",
+      "acceptance_criteria": [
+        "Exercise Card displays movement name.",
+        "Exercise Card displays target muscle group.",
+        "Exercise Card displays body part.",
+        "Exercise Card displays equipment.",
+        "Exercise Card contains GIF/placeholder area.",
+        "Exercise List handles empty search results.",
+        "Exercise List displays loading skeleton during fetch.",
+        "Clickable UI elements in list are minimum 44px height."
+      ],
+      "dependencies": ["TASK-006"],
+      "completed": false
+    },
+    {
+      "id": "TASK-008",
+      "category": "Exercise Library - Unified Search & Filters",
+      "description": "Implement the logic to search and filter both Global and Custom exercises.",
+      "acceptance_criteria": [
+        "Search results aggregate API and local DB data.",
+        "Search input is debounced.",
+        "Filtering by Body Part is functional.",
+        "Filtering by Equipment is functional.",
+        "Filtering by Target Muscle is functional.",
+        "Filter options are derived from dataset.",
+        "Custom exercises are visually distinguished from Global ones."
+      ],
+      "dependencies": ["TASK-002", "TASK-007"],
+      "completed": false
+    },
+    {
+      "id": "TASK-009",
+      "category": "Custom Exercise Management",
+      "description": "Implement Custom Exercise management using Tanstack Form and Server Actions.",
+      "acceptance_criteria": [
+        "@tanstack/react-form and zod are installed.",
+        "Zod schema defines exercise validation rules.",
+        "createCustomExercise Server Action persists data.",
+        "updateCustomExercise Server Action modifies existing data.",
+        "deleteCustomExercise Server Action removes data.",
+        "Form displays real-time validation errors.",
+        "Form prevents duplicate names for the same user.",
+        "Muscle/Equipment selectors are functional."
+      ],
+      "dependencies": ["TASK-003", "TASK-008"],
+      "completed": false
+    },
+    {
+      "id": "TASK-010",
+      "category": "Routine Builder - Core Drafting",
+      "description": "Implement the state-driven logic for drafting a routine.",
+      "acceptance_criteria": [
+        "Zustand store manages routine draft state.",
+        "Action to add exercise to draft exists.",
+        "Action to remove exercise from draft exists.",
+        "Draft state mirrors to localStorage.",
+        "Reloading page restores routine draft from localStorage.",
+        "Cancel action prompts for confirmation on unsaved changes."
+      ],
+      "dependencies": ["TASK-008"],
+      "completed": false
+    },
+    {
+      "id": "TASK-011",
+      "category": "Routine Builder - Grouping & Supersets",
+      "description": "Implement the UI and logic for grouping exercises into supersets within the builder.",
+      "acceptance_criteria": [
+        "Action to group 2+ exercises exists.",
+        "UI displays visual container/box for supersets.",
+        "Action to reorder exercises within a group exists.",
+        "Action to reorder groups within the routine exists.",
+        "Reorder UI uses mobile-friendly handles or buttons."
+      ],
+      "dependencies": ["TASK-010"],
+      "completed": false
+    },
+    {
+      "id": "TASK-012",
+      "category": "Routine Builder - Persistence",
+      "description": "Implement the persistence logic for saving routines and shadowing global exercises.",
+      "acceptance_criteria": [
+        "saveRoutine Server Action persists routine hierarchy.",
+        "Global exercises are shadowed to local DB upon saving.",
+        "Shadowing logic skips already-shadowed external_ids.",
+        "Target Weight/Reps/Duration map correctly to RoutineSet table.",
+        "RoutineGroup and RoutineExercise join records are created correctly."
+      ],
+      "dependencies": ["TASK-002", "TASK-011"],
+      "completed": false
+    },
+    {
+      "id": "TASK-013",
+      "category": "Routine Management - Views",
+      "description": "Implement the library list and blueprint detail views for routines.",
+      "acceptance_criteria": [
+        "Routines tab displays user's routines.",
+        "Routine list item shows name and exercise count.",
+        "Detail view displays Groups -> Exercises -> Targets hierarchy.",
+        "Detail view displays persistent exercise notes.",
+        "Delete flow is accessible from Routine Detail.",
+        "Edit flow is accessible from Routine Detail."
+      ],
+      "dependencies": ["TASK-012"],
+      "completed": false
+    },
+    {
+      "id": "TASK-014",
+      "category": "Active Workout - Session Store",
+      "description": "Implement the Zustand store for managing active workout state.",
+      "acceptance_criteria": [
+        "useWorkoutSession Zustand store is implemented.",
+        "Store manages a hierarchical state of WorkoutGroups, Exercises, and Sets.",
+        "Store provides a 'startWorkout' action that accepts a Routine template.",
+        "Store provides a 'startWorkout' action that initializes an empty template.",
+        "Store maintains a 'lastUpdated' timestamp for inactivity tracking."
+      ],
+      "dependencies": ["TASK-010", "TASK-012"],
+      "completed": false
+    },
+    {
+      "id": "TASK-015",
+      "category": "Active Workout - Persistence & Resumption",
+      "description": "Implement the localStorage persistence and time-based resumption logic.",
+      "acceptance_criteria": [
+        "Workout session state is synchronized to localStorage on every change.",
+        "App detects active session in localStorage upon initialization.",
+        "Utility logic identifies sessions < 2 hours old as 'active'.",
+        "Utility logic identifies sessions 2-4 hours old as 'stale'.",
+        "Utility logic identifies sessions > 4 hours old as 'abandoned'.",
+        "Initial page load auto-redirects 'active' sessions to the workout screen.",
+        "Redirect logic executes before dashboard render to prevent content flashing."
+      ],
+      "dependencies": ["TASK-014"],
+      "completed": false
+    },
+    {
+      "id": "TASK-016",
+      "category": "Active Workout - Focus Mode Layout",
+      "description": "Build the layout shell for the Focus Mode experience.",
+      "acceptance_criteria": [
+        "Focus Mode layout suppresses the global BottomTabBar.",
+        "Top-level ProgressBar reflects (completed groups / total groups) * 100.",
+        "Toggle button exists to switch between Carousel and List views.",
+        "Finish button triggers a session summary overlay.",
+        "Discard button triggers a confirmation dialog."
+      ],
+      "dependencies": ["TASK-015"],
+      "completed": false
+    },
+    {
+      "id": "TASK-017",
+      "category": "Active Workout - Carousel UI",
+      "description": "Implement the horizontal Carousel component for Focus Mode.",
+      "acceptance_criteria": [
+        "Carousel renders exactly one WorkoutExerciseGroup card at a time.",
+        "Carousel container uses CSS scroll-snap for card alignment.",
+        "Superset groups render interleaved exercise rows within the card.",
+        "Large 'Previous' and 'Next' navigation buttons are fixed to the UI.",
+        "Swiping gesture updates the active card index in the session store."
+      ],
+      "dependencies": ["TASK-016"],
+      "completed": false
+    },
+    {
+      "id": "TASK-018",
+      "category": "Active Workout - Logging Interface",
+      "description": "Implement the set-logging interaction layer.",
+      "acceptance_criteria": [
+        "Weight input uses inputmode='decimal' for mobile keyboards.",
+        "Reps input uses inputmode='numeric' for mobile keyboards.",
+        "Input fields and checkboxes have a minimum 44px hit box.",
+        "Tapping a checkbox marks the set 'completed' in Zustand store.",
+        "Inputs are pre-filled with values from the user's previous session for that movement.",
+        "Buttons to add/remove sets from the active exercise are functional."
+      ],
+      "dependencies": ["TASK-017"],
+      "completed": false
+    },
+    {
+      "id": "TASK-019",
+      "category": "Active Workout - Qualitative Feedback",
+      "description": "Implement the automatic feedback overlay and auto-advance logic.",
+      "acceptance_criteria": [
+        "Feedback overlay triggers upon checking the final set of a card.",
+        "Overlay displays buttons for 'Too Easy', 'Solid', 'Struggle', 'Failure'.",
+        "Selecting an option updates the feedback field of the last set in the card.",
+        "Selecting an option triggers a carousel advance to the next card.",
+        "Feedback overlay is non-modal and does not block manual swiping."
+      ],
+      "dependencies": ["TASK-018"],
+      "completed": false
+    },
+    {
+      "id": "TASK-020",
+      "category": "Active Workout - Rest Timer",
+      "description": "Implement the reactive rest timer functionality.",
+      "acceptance_criteria": [
+        "Timer countdown initializes automatically when any set is marked completed.",
+        "Timer UI is displayed as a non-intrusive floating pill.",
+        "Timer UI provides a '+30s' action button.",
+        "Timer UI provides a 'Skip' action button.",
+        "Visual indicator (e.g., flashing or color change) triggers when timer hits zero."
+      ],
+      "dependencies": ["TASK-018"],
+      "completed": false
+    },
+    {
+      "id": "TASK-021",
+      "category": "History Feed - Core List UI",
+      "description": "Implement the primary history tab and chronological workout list.",
+      "acceptance_criteria": [
+        "History tab is set as the default landing page for authenticated users.",
+        "Past workouts are displayed in a chronological list, most recent first.",
+        "Each list item displays the workout name and start time.",
+        "Each list item displays the total volume lifted during that session.",
+        "Each list item shows a summarized list of exercises performed.",
+        "Empty state correctly prompts the user to start their first workout."
+      ],
+      "dependencies": ["TASK-002", "TASK-003", "TASK-014"],
+      "completed": false
+    },
+    {
+      "id": "TASK-022",
+      "category": "History Feed - Status & Resumption UI",
+      "description": "Implement the UI components for session status and active session resumption.",
+      "acceptance_criteria": [
+        "Workouts with >4h inactivity display an 'Incomplete' badge in the history list.",
+        "Tapping an 'Incomplete' workout opens the workout in Overview (Edit) mode.",
+        "A 'Resume Workout' banner appears on the History tab for sessions with 2-4h inactivity.",
+        "The banner 'Resume' button launches the session in Focus Mode.",
+        "The banner 'Finish' button saves the session as-is and returns to the default History state."
+      ],
+      "dependencies": ["TASK-015", "TASK-021"],
+      "completed": false
+    },
+    {
+      "id": "TASK-023",
+      "category": "History - Hero Graph (Heatmap)",
+      "description": "Implement the GitHub-style contribution grid for volume and effort visualization.",
+      "acceptance_criteria": [
+        "Heatmap grid renders at the top of the History tab.",
+        "Default heatmap state reflects daily total volume lifted.",
+        "A toggle switch exists to alternate between 'Volume' and 'Effort' modes.",
+        "In 'Effort' mode, color intensity reflects the average qualitative feedback for that day.",
+        "Legend and tooltips provide context for color intensity across modes.",
+        "Grid correctly spans the last 12 months of user activity."
+      ],
+      "dependencies": ["TASK-021"],
+      "completed": false
+    },
+    {
+      "id": "TASK-024",
+      "category": "History - Post-Hoc Editing",
+      "description": "Implement the ability to modify past workout data.",
+      "acceptance_criteria": [
+        "Navigation from history list opens a full edit view of the past workout.",
+        "Users can add or remove sets from any exercise in a completed workout.",
+        "Users can modify weight, reps, and feedback values for any past set.",
+        "Saving changes triggers a re-calculation of the workout's total volume.",
+        "A destructive 'Delete Workout' action is available with a confirmation dialog."
+      ],
+      "dependencies": ["TASK-021"],
+      "completed": false
+    },
+    {
+      "id": "TASK-025",
+      "category": "Progression Engine - Logic",
+      "description": "Implement the deterministic logic for volume progression recommendations.",
+      "acceptance_criteria": [
+        "A utility function 'calculateProgression' is implemented and tested.",
+        "Logic suggests adjustments to weight/reps to achieve target volume increase.",
+        "Logic constraints compound exercise suggestions to 6-10 reps.",
+        "Logic constraints isolation exercise suggestions to 8-12 reps.",
+        "'too_easy' feedback triggers a ~5-10% suggested volume increase.",
+        "'solid' feedback triggers a ~2.5-5% suggested volume increase.",
+        "'struggle' feedback results in no volume change (maintenance).",
+        "'failure' feedback results in no volume change or a suggested decrease.",
+        "Unit tests cover all feedback paths and adjustment edge cases."
+      ],
+      "dependencies": ["TASK-004", "TASK-014"],
+      "completed": false
+    },
+    {
+      "id": "TASK-026",
+      "category": "Progression Engine - Smart Defaults",
+      "description": "Integrate progression suggestions into the Active Workout logging experience.",
+      "acceptance_criteria": [
+        "Active Workout inputs are initialized with targets from the Progression Engine.",
+        "Targets are derived from the user's most recent session for each exercise.",
+        "Suggested values are displayed as distinct 'placeholder' or 'ghost' text.",
+        "Engine correctly identifies 'Discovery' mode for exercises with no history.",
+        "Discovery mode defaults to blank inputs or sensible baseline targets."
+      ],
+      "dependencies": ["TASK-018", "TASK-025"],
+      "completed": false
+    },
+    {
+      "id": "TASK-027",
+      "category": "Polish - Onboarding",
+      "description": "Implement the first-run experience and empty states.",
+      "acceptance_criteria": [
+        "Empty Routines tab displays a 'Create your first Routine' call-to-action.",
+        "Empty History tab displays a 'How it works' summary for new users.",
+        "A non-blocking introductory overlay explains Carousel navigation during the first workout session.",
+        "User's 'First Run' status is persisted to ensure onboarding only shows once."
+      ],
+      "dependencies": ["TASK-013", "TASK-021"],
+      "completed": false
+    },
+    {
+      "id": "TASK-028",
+      "category": "Polish - Animations",
+      "description": "Add micro-interactions and transitions to enhance the user experience.",
+      "acceptance_criteria": [
+        "Carousel cards use performant CSS or Framer Motion transitions for swiping and navigation.",
+        "Checking off a set triggers a visual completion animation.",
+        "Switching between primary tabs and Focus Mode is smoothly animated.",
+        "Workout completion triggers a high-energy celebratory animation or effect."
+      ],
+      "dependencies": ["TASK-016", "TASK-018"],
+      "completed": false
+    },
+    {
+      "id": "TASK-029",
+      "category": "Polish - UI/UX Refinement",
+      "description": "Perform a final audit and polish of the user interface.",
+      "acceptance_criteria": [
+        "Color contrast is audited and adjusted for readability in bright sunlight.",
+        "Every actionable UI element meets the minimum 44x44px touch target requirement.",
+        "Skeleton loading screens are implemented for all primary data-fetching views.",
+        "Input focus management is optimized to prevent unexpected mobile keyboard behavior."
+      ],
+      "dependencies": ["TASK-007", "TASK-021"],
+      "completed": false
+    }
+  ]
+}
