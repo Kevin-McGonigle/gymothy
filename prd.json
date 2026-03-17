@@ -39,7 +39,7 @@
         "pnpm drizzle-kit push succeeds against local SQLite file."
       ],
       "dependencies": ["TASK-001"],
-      "completed": false
+      "completed": true
     },
     {
       "id": "TASK-003",
