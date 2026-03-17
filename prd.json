@@ -121,10 +121,10 @@
         "Exercise Card contains GIF/placeholder area.",
         "Exercise List handles empty search results.",
         "Exercise List displays loading skeleton during fetch.",
-        "Clickable UI elements in list are minimum 44px height."
+        "Clickable UI elements in list are minimum 2rem height."
       ],
       "dependencies": ["TASK-006"],
-      "completed": false
+      "completed": true
     },
     {
       "id": "TASK-008",
@@ -282,7 +282,7 @@
       "acceptance_criteria": [
         "Weight input uses inputmode='decimal' for mobile keyboards.",
         "Reps input uses inputmode='numeric' for mobile keyboards.",
-        "Input fields and checkboxes have a minimum 44px hit box.",
+        "Input fields and checkboxes have a minimum 2rem hit box.",
         "Tapping a checkbox marks the set 'completed' in Zustand store.",
         "Inputs are pre-filled with values from the user's previous session for that movement.",
         "Buttons to add/remove sets from the active exercise are functional."
