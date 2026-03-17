@@ -57,7 +57,7 @@
         ".env.example contains BETTER_AUTH_URL."
       ],
       "dependencies": ["TASK-002"],
-      "completed": false
+      "completed": true
     },
     {
       "id": "TASK-004",
