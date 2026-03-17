@@ -1,8 +1,16 @@
 import "@testing-library/jest-dom";
 import { cleanup } from "@testing-library/react";
-import { afterEach } from "vitest";
+import { afterAll, afterEach, beforeAll } from "vitest";
+import { server } from "./mocks/server";
 
-// Automatically cleanup after each test
+// Start MSW server before all tests
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+
+// Reset any runtime handlers and cleanup RTL after each test
 afterEach(() => {
+  server.resetHandlers();
   cleanup();
 });
+
+// Close MSW server after all tests
+afterAll(() => server.close());

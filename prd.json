@@ -91,7 +91,7 @@
         "Application landing page loads on Vercel deployment URL."
       ],
       "dependencies": ["TASK-003", "TASK-004"],
-      "completed": false
+      "completed": true
     },
     {
       "id": "TASK-006",
@@ -107,7 +107,7 @@
         "Unit tests for fetching logic pass with MSW."
       ],
       "dependencies": ["TASK-004"],
-      "completed": false
+      "completed": true
     },
     {
       "id": "TASK-007",

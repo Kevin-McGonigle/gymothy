@@ -92,3 +92,24 @@
 
 - **Decision:** Just-in-Time overlays and helpful empty states. No upfront wizard.
 - **Rationale:** Reduces friction to value. Users learn by doing, not by reading.
+
+## 16. Task-006 ExerciseDB Service Foundation
+
+- **Decision:** Implement a plain TypeScript service module (`lib/exercises/service.ts`) for ExerciseDB data fetching, with hook wrappers deferred to later tasks (TASK-007/TASK-008).
+- **Rationale:** Service is directly testable and decoupled from React; aligns with product intent for core data access library.
+
+- **Decision:** Cover essential endpoints required to unblock UI card rendering:
+  - `GET /api/v1/exercises` (list with pagination/search)
+  - `GET /api/v1/exercises/{exerciseId}` (single exercise details)
+  - `GET /api/v1/exercises/search` (fuzzy search)
+  - Optional advanced filtering endpoints deferred until needed.
+- **Rationale:** Keep scope minimal but sufficient for Exercise Card data (name, muscles, bodyPart, equipment, gifUrl), with room to add complexity when UX demands.
+
+- **Decision:** Use `zod` for response schema validation to protect against ExerciseDB contract drift.
+- **Rationale:** Provides safety for external API responses and early failure paths.
+
+- **Decision:** Enforce HTTP request timeout of 10 seconds.
+- **Rationale:** Protects UX from hanging requests while allowing enough time for remote API latency.
+
+- **Decision:** Hardcode ExerciseDB base URL (`https://exercisedb.dev/api/v1`) in the service module.
+- **Rationale:** No environment-driven configurability is needed for MVP; keeps implementation simple.
