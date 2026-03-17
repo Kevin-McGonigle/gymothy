@@ -65,8 +65,14 @@
 
 ## Testing
 
-Run the test suite with Vitest:
+### Unit and Component Tests (Vitest)
 
 ```bash
 pnpm test
+```
+
+### End-to-End Tests (Playwright)
+
+```bash
+pnpm test:e2e
 ```

@@ -52,7 +52,7 @@
         "app/api/auth/[...all]/route.ts handler exists.",
         "middleware.ts protects private routes (History, Routines, Workout).",
         "Better Auth schema successfully generated via CLI.",
-        "Endpoint /api/auth/ok returns {status: 'ok'}.",
+        "Endpoint /api/ok returns {status: 'ok'}.",
         ".env.example contains BETTER_AUTH_SECRET.",
         ".env.example contains BETTER_AUTH_URL."
       ],
@@ -62,19 +62,23 @@
     {
       "id": "TASK-004",
       "category": "Testing Infrastructure",
-      "description": "Configure Vitest and React Testing Library for automated verification.",
+      "description": "Configure Playwright, Vitest and React Testing Library for automated verification.",
       "acceptance_criteria": [
+        "Playwright is set up using `pnpm create playwright`",
         "vitest and @testing-library/react are installed.",
         "vitest.config.ts is correctly configured for Next.js.",
         "tests/setup.ts exists.",
         "tests/setup.ts handles JSDOM global setup.",
         "tests/setup.ts handles React Testing Library cleanup.",
         "pnpm test command executes test suite.",
+        "pnpm test:e2e command executes Playwright tests.",
         "Dummy unit test passes.",
-        "Dummy component test passes."
+        "Dummy component test passes.",
+        "Dummy e2e test passes in Playwright.",
+        "README.md is updated with testing instructions."
       ],
       "dependencies": ["TASK-001"],
-      "completed": false
+      "completed": true
     },
     {
       "id": "TASK-005",
