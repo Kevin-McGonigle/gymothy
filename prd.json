@@ -64,7 +64,7 @@
       "category": "Testing Infrastructure",
       "description": "Configure Playwright, Vitest and React Testing Library for automated verification.",
       "acceptance_criteria": [
-        "Playwright is set up using `pnpm create playwright`",
+        "Playwright is set up using `pnpm create playwright`.",
         "vitest and @testing-library/react are installed.",
         "vitest.config.ts is correctly configured for Next.js.",
         "tests/setup.ts exists.",
@@ -449,17 +449,224 @@
     },
     {
       "id": "TASK-030",
-      "category": "Testing Infrastructure - Seeded DB",
-      "description": "Set up in-memory SQLite with Drizzle for testing DB queries with seeded data.",
+      "category": "Testing Infrastructure - In-Memory DB",
+      "description": "Set up a high-fidelity Vitest environment using an in-memory SQLite database and global Drizzle mocking to test database-dependent logic without manual dependency injection.",
       "acceptance_criteria": [
-        "tests/db/ directory created for test utilities.",
-        "In-memory SQLite database is configured for tests.",
-        "Drizzle test client is configured to use in-memory DB.",
-        "Test data seeding utility exists for exercises table.",
-        "Migration schema is applied before tests run.",
-        "useExercises hook tests use seeded DB instead of vi.mock on actions."
+        "Vitest dev dependencies (vitest, better-sqlite3, @faker-js/faker) are installed.",
+        "vitest.config.ts is configured with a 'setupFiles' entry for database initialization.",
+        "A 'tests/setup-db.ts' file is created to manage the test lifecycle.",
+        "An in-memory 'better-sqlite3' instance is initialized within the setup file.",
+        "A Drizzle 'testDb' instance is created using the existing project schema.",
+        "The production '@/lib/db' module is globally intercepted using 'vi.mock'.",
+        "Database migrations from './drizzle' are applied to the in-memory DB in a 'beforeAll' hook.",
+        "A 'clearDb' utility is implemented to programmatically truncate all schema tables.",
+        "The 'clearDb' utility is executed in a 'beforeEach' hook to ensure test isolation.",
+        "An exercise factory utility is created in 'tests/factories/exercise.factory.ts'.",
+        "The exercise factory supports 'Partial' overrides for all schema columns.",
+        "The exercise factory uses '@faker-js/faker' for default value generation.",
+        "A test suite for 'getCustomExercises' is implemented verifying 'userId' isolation.",
+        "A test suite for 'getCustomExercises' is implemented verifying 'search' partial matching.",
+        "A test suite for 'getCustomExercises' is implemented verifying 'bodyParts' array/OR logic.",
+        "A test suite for 'getCustomExercises' is implemented verifying 'limit' and 'offset' pagination."
       ],
       "dependencies": ["TASK-004", "TASK-008"],
+      "completed": false
+    },
+    {
+      "id": "TASK-031",
+      "category": "Project Hygiene & AI Context",
+      "description": "Implement foundational routing and root layout to resolve orphaned UI components.",
+      "acceptance_criteria": [
+        "app/layout.tsx is created at the root of the app directory.",
+        "app/layout.tsx includes the standard <html> and <body> tags.",
+        "app/layout.tsx imports and applies app/globals.css.",
+        "app/layout.tsx renders the {children} prop within the body.",
+        "app/layout.tsx exports a 'metadata' object with title 'Gymothy' and a description.",
+        "app/page.tsx is created at the root of the app directory.",
+        "app/page.tsx renders a functional landing page component.",
+        "app/page.tsx is accessible at the root URL (/).",
+        "Browser tab title matches the metadata provided in the root layout."
+      ],
+      "dependencies": ["TASK-001"],
+      "completed": false
+    },
+    {
+      "id": "TASK-032",
+      "category": "Authentication Setup",
+      "description": "Implement Next.js middleware for route protection and session validation.",
+      "acceptance_criteria": [
+        "middleware.ts is created at the project root.",
+        "middleware.ts correctly imports the auth instance from lib/auth.ts.",
+        "middleware.ts utilizes the better-auth/next-js middleware utility.",
+        "middleware.ts prevents access to /exercises for unauthenticated users.",
+        "middleware.ts prevents access to /routines for unauthenticated users.",
+        "middleware.ts prevents access to /history for unauthenticated users.",
+        "middleware.ts allows public access to the root URL (/).",
+        "middleware.ts allows public access to auth API routes (/api/auth/*).",
+        "Unauthenticated attempts to access protected routes redirect to the landing page."
+      ],
+      "dependencies": ["TASK-003", "TASK-031"],
+      "completed": false
+    },
+    {
+      "id": "TASK-033",
+      "category": "Authentication Setup",
+      "description": "Implement the client-side authentication instance to enable frontend session management.",
+      "acceptance_criteria": [
+        "lib/auth-client.ts is created in the lib directory.",
+        "lib/auth-client.ts exports a singleton 'authClient' instance.",
+        "authClient is initialized using the 'createAuthClient' utility.",
+        "authClient baseURL is configured correctly via environment variables.",
+        "A client component can successfully import authClient and use the 'useSession' hook.",
+        "Authentication state (isLoggedIn/User) is reactive within React components."
+      ],
+      "dependencies": ["TASK-003"],
+      "completed": false
+    },
+    {
+      "id": "TASK-034",
+      "category": "UI Components",
+      "description": "Refactor UI components to support stable refs and React 19 forwardRef patterns.",
+      "acceptance_criteria": [
+        "components/ui/button.tsx is refactored to use React.forwardRef.",
+        "components/ui/input.tsx is refactored to use React.forwardRef.",
+        "components/ui/card.tsx subcomponents are refactored to use React.forwardRef.",
+        "components/ui/badge.tsx is refactored to use React.forwardRef.",
+        "components/ui/skeleton.tsx is refactored to use React.forwardRef.",
+        "components/ui/spinner.tsx is refactored to use React.forwardRef.",
+        "Each refactored component correctly passes the 'ref' to its underlying DOM element.",
+        "Each refactored component correctly types the 'ref' in its TypeScript interface.",
+        "Component tests (e.g., button.test.tsx) verify that refs can be successfully attached."
+      ],
+      "dependencies": ["TASK-007"],
+      "completed": false
+    },
+    {
+      "id": "TASK-035",
+      "category": "UI Components",
+      "description": "Optimize interactive UI components for mobile touch targets (44px minimum).",
+      "acceptance_criteria": [
+        "buttonVariants in components/ui/button.tsx is updated for accessible sizing.",
+        "The 'default' size for Button is increased to a minimum height of 44px (e.g., h-11).",
+        "The 'icon' size for Button is increased to a minimum width/height of 44px (e.g., size-11).",
+        "Input component base height in components/ui/input.tsx is increased to 44px.",
+        "All interactive variants (sm, lg) are adjusted to ensure mobile touch targets are >= 44px.",
+        "A visual regression or manual check confirms layout remains consistent after size changes.",
+        "Accessibility tests verify that all interactive elements meet WCAG touch target standards."
+      ],
+      "dependencies": ["TASK-007"],
+      "completed": false
+    },
+    {
+      "id": "TASK-036",
+      "category": "Exercise Library - UI Components",
+      "description": "Refactor ExerciseCard to use semantic HTML and correct Base UI primitives.",
+      "acceptance_criteria": [
+        "components/exercise-card.tsx root element is changed from 'div' to a native 'button'.",
+        "Alternatively, components/exercise-card.tsx uses the 'Button' primitive from components/ui/button.tsx.",
+        "Manual role='button' and tabIndex={0} attributes are removed.",
+        "Manual Enter/Space keydown handlers are removed (rely on native button behavior).",
+        "The component maintains its existing visual styling and layout.",
+        "The component continues to correctly trigger the 'onClick' prop when activated.",
+        "The component correctly satisfies the 44px minimum height requirement.",
+        "exercise-card.test.tsx is updated to assert the root element is a 'button'."
+      ],
+      "dependencies": ["TASK-007", "TASK-034"],
+      "completed": false
+    },
+    {
+      "id": "TASK-037",
+      "category": "Exercise Library - Unified Search & Filters",
+      "description": "Move exercise search and filter state into URL search parameters for navigation persistence.",
+      "acceptance_criteria": [
+        "lib/exercises/use-exercises.ts is refactored to initialize state from URL searchParams.",
+        "The hook uses 'useSearchParams' or 'usePathname' from next/navigation.",
+        "Updating the search query triggers a URL update (e.g., ?q=bench).",
+        "Updating filters (bodyPart, equipment, target) triggers corresponding URL updates.",
+        "URL updates use 'router.push' or 'router.replace' to manage browser history.",
+        "Page reload successfully restores all filter and search states from the URL.",
+        "Clearing a filter correctly removes the parameter from the URL.",
+        "Local 'useState' for these specific filter values is removed from the hook."
+      ],
+      "dependencies": ["TASK-008"],
+      "completed": false
+    },
+    {
+      "id": "TASK-038",
+      "category": "Exercise Library - API Integration",
+      "description": "Implement a server-side proxy for ExerciseDB API calls to enhance security and caching.",
+      "acceptance_criteria": [
+        "A Next.js Route Handler (e.g., /api/exercises) is created to proxy ExerciseDB requests.",
+        "lib/exercises/service.ts is refactored to fetch from the internal proxy instead of ExerciseDB directly.",
+        "External API keys or sensitive logic are moved from the client to the server proxy.",
+        "The proxy correctly forwards search, filter, and pagination parameters to ExerciseDB.",
+        "The proxy implements server-side caching (e.g., unstable_cache or fetch options) where appropriate.",
+        "The proxy handles ExerciseDB error responses and returns semantic HTTP status codes.",
+        "Unit tests for the proxy route verify correct data forwarding and error handling."
+      ],
+      "dependencies": ["TASK-006"],
+      "completed": false
+    },
+    {
+      "id": "TASK-039",
+      "category": "UI Components",
+      "description": "Standardize CVA and className merging patterns across all UI components.",
+      "acceptance_criteria": [
+        "The 'Button' component refactored to use the explicit cn(variants(...), className) pattern.",
+        "The 'EmptyMedia' component refactored to use the explicit cn(variants(...), className) pattern.",
+        "All components in components/ui follow the same pattern for merging external classNames.",
+        "All components in components/ui utilize the 'cn' utility consistently.",
+        "A manual review confirms that variant-specific styles are correctly applied to all components.",
+        "Existing component tests continue to pass without style regressions."
+      ],
+      "dependencies": ["TASK-007"],
+      "completed": false
+    },
+    {
+      "id": "TASK-040",
+      "category": "Infrastructure - Security",
+      "description": "Implement runtime environment variable validation using Zod.",
+      "acceptance_criteria": [
+        "A validation schema for environment variables is created (e.g., using Zod).",
+        "Required variables like BETTER_AUTH_SECRET and BETTER_AUTH_URL are included in the schema.",
+        "Database connection strings and API URLs are included in the schema.",
+        "The application fails to start (throws error) if required variables are missing or malformed.",
+        "An env.ts (or similar) utility is created to export validated environment variables.",
+        "Existing code is updated to import variables from the validated utility instead of process.env.",
+        "Development and production environments are both covered by the validation."
+      ],
+      "dependencies": ["TASK-005"],
+      "completed": false
+    },
+    {
+      "id": "TASK-041",
+      "category": "API - Logic",
+      "description": "Refactor Server Actions to return structured result objects instead of throwing errors.",
+      "acceptance_criteria": [
+        "lib/exercises/actions.ts actions are refactored to return a common Result type.",
+        "The Result type includes fields for 'success' (boolean), 'data' (generic), and 'error' (string).",
+        "Actions handle internal errors gracefully and return an error result instead of crashing.",
+        "Client components (e.g., useExercises) are updated to handle the new structured response.",
+        "Type safety is maintained for the 'data' payload in successful results.",
+        "A helper utility (e.g., 'toResult') is considered to standardize the conversion.",
+        "Unit tests verify that actions return the correct success/error structure."
+      ],
+      "dependencies": ["TASK-009"],
+      "completed": false
+    },
+    {
+      "id": "TASK-042",
+      "category": "Project Hygiene & AI Context",
+      "description": "Perform code hygiene cleanup by removing unused imports and redundant configurations.",
+      "acceptance_criteria": [
+        "Unused 'use' import is removed from lib/exercises/types.ts.",
+        "Redundant 'dotenv/config' import is removed from lib/db/index.ts.",
+        "A project-wide lint check (pnpm lint) passes without errors.",
+        "A project-wide format check (pnpm format) passes without changes.",
+        "Dead code or placeholder files are identified and removed.",
+        "All remaining code follows the project's established style and conventions."
+      ],
+      "dependencies": ["TASK-001"],
       "completed": false
     }
   ]
