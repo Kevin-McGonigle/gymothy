@@ -8,15 +8,21 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import type { Exercise } from "@/lib/exercises/types";
+import type { ExerciseWithSource } from "@/lib/exercises/use-exercises";
 import { cn } from "@/lib/utils";
 
+type ExerciseCardExercise =
+  | { variant: "api"; data: Exercise }
+  | { variant: "custom"; data: ExerciseWithSource };
+
 interface ExerciseCardProps {
-  exercise: Exercise;
+  exercise: ExerciseCardExercise;
   className?: string;
-  onClick?: (exercise: Exercise) => void;
+  onClick?: (exercise: ExerciseWithSource) => void;
   priority?: boolean;
 }
 
@@ -29,11 +35,14 @@ export const ExerciseCard = memo(function ExerciseCard({
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
 
+  const isCustom = exercise.variant === "custom";
+  const data = isCustom ? exercise.data : { ...exercise.data, isCustom: false };
+
   const handleClick = useCallback(() => {
     if (onClick) {
-      onClick(exercise);
+      onClick(data);
     }
-  }, [onClick, exercise]);
+  }, [onClick, data]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -64,10 +73,10 @@ export const ExerciseCard = memo(function ExerciseCard({
             <Spinner />
           </div>
         )}
-        {!imageError && exercise.gifUrl ? (
+        {!imageError && data.gifUrl ? (
           <Image
-            src={exercise.gifUrl}
-            alt={exercise.name}
+            src={data.gifUrl}
+            alt={data.name}
             fill
             priority={priority}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -87,24 +96,31 @@ export const ExerciseCard = memo(function ExerciseCard({
           </div>
         )}
       </div>
-      <CardHeader className="p-4 pb-2">
-        <h3 className="font-semibold text-lg leading-tight truncate">
-          {exercise.name}
-        </h3>
+      <CardHeader className="pb-2">
+        <div className="flex items-center gap-2">
+          <CardTitle className="font-semibold text-lg leading-tight truncate">
+            {data.name}
+          </CardTitle>
+          {isCustom ? (
+            <Badge variant="secondary" className="text-xs">
+              Custom
+            </Badge>
+          ) : null}
+        </div>
       </CardHeader>
-      <CardContent className="p-4 pt-0">
+      <CardContent className="pt-0">
         <div className="flex flex-wrap gap-1.5">
-          {exercise.targetMuscles.slice(0, 1).map((muscle) => (
+          {data.targetMuscles.slice(0, 1).map((muscle: string) => (
             <Badge key={muscle} variant="secondary" className="text-xs">
               {muscle}
             </Badge>
           ))}
-          {exercise.bodyParts.slice(0, 1).map((part) => (
+          {data.bodyParts.slice(0, 1).map((part: string) => (
             <Badge key={part} variant="outline" className="text-xs">
               {part}
             </Badge>
           ))}
-          {exercise.equipments.slice(0, 1).map((equipment) => (
+          {data.equipments.slice(0, 1).map((equipment: string) => (
             <Badge key={equipment} variant="outline" className="text-xs">
               {equipment}
             </Badge>
@@ -113,7 +129,7 @@ export const ExerciseCard = memo(function ExerciseCard({
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <div className="flex gap-1.5">
-          {exercise.secondaryMuscles.slice(0, 2).map((muscle) => (
+          {data.secondaryMuscles.slice(0, 2).map((muscle: string) => (
             <span key={muscle} className="text-xs text-muted-foreground">
               {muscle}
             </span>

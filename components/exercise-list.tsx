@@ -3,12 +3,12 @@
 import { ExerciseCard } from "@/components/exercise-card";
 import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Exercise } from "@/lib/exercises/types";
+import type { ExerciseWithSource } from "@/lib/exercises/use-exercises";
 
 interface ExerciseListProps {
-  exercises?: Exercise[];
+  exercises?: ExerciseWithSource[];
   loading?: boolean;
-  onExerciseClick?: (exercise: Exercise) => void;
+  onExerciseClick?: (exercise: ExerciseWithSource) => void;
   className?: string;
 }
 
@@ -62,7 +62,10 @@ export function ExerciseList({
         {exercises.map((exercise, index) => (
           <ExerciseCard
             key={exercise.exerciseId}
-            exercise={exercise}
+            exercise={{
+              variant: exercise.isCustom ? "custom" : "api",
+              data: exercise,
+            }}
             onClick={onExerciseClick}
             priority={index < 3}
           />

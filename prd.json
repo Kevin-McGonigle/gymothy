@@ -446,6 +446,21 @@
       ],
       "dependencies": ["TASK-007", "TASK-021"],
       "completed": false
+    },
+    {
+      "id": "TASK-030",
+      "category": "Testing Infrastructure - Seeded DB",
+      "description": "Set up in-memory SQLite with Drizzle for testing DB queries with seeded data.",
+      "acceptance_criteria": [
+        "tests/db/ directory created for test utilities.",
+        "In-memory SQLite database is configured for tests.",
+        "Drizzle test client is configured to use in-memory DB.",
+        "Test data seeding utility exists for exercises table.",
+        "Migration schema is applied before tests run.",
+        "useExercises hook tests use seeded DB instead of vi.mock on actions."
+      ],
+      "dependencies": ["TASK-004", "TASK-008"],
+      "completed": false
     }
   ]
 }

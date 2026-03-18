@@ -5,3 +5,6 @@
 - **Client State:** Zustand for complex interactive sessions (Active Workout, Routine Builder).
 - **Mutations:** Server Actions for data mutations where possible.
 - **Styling:** Utility classes only. Avoid arbitrary values.
+- **Scripts:** Use pnpm for all scripts and commands.
+- **Tools:** Prefer built-in tool use over custom shell commands.
+- **Loops:** Avoid for/while loops. Use functional array methods where possible.

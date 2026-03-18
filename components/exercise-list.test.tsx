@@ -1,9 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { Exercise } from "@/lib/exercises/types";
+import type { ExerciseWithSource } from "@/lib/exercises/use-exercises";
 import { ExerciseList } from "./exercise-list";
 
-const mockExercises: Exercise[] = [
+const mockExercises: ExerciseWithSource[] = [
   {
     exerciseId: "abc123",
     name: "Barbell Bench Press",
@@ -13,6 +13,7 @@ const mockExercises: Exercise[] = [
     equipments: ["barbell"],
     secondaryMuscles: ["triceps"],
     instructions: ["Lie on bench", "Press up"],
+    isCustom: false,
   },
   {
     exerciseId: "def456",
@@ -23,6 +24,8 @@ const mockExercises: Exercise[] = [
     equipments: ["dumbbell"],
     secondaryMuscles: [],
     instructions: ["Curl weight"],
+    isCustom: true,
+    userId: "user_123",
   },
 ];
 
@@ -47,6 +50,12 @@ describe("ExerciseList", () => {
 
     expect(screen.getByText("Barbell Bench Press")).toBeInTheDocument();
     expect(screen.getByText("Dumbbell Curl")).toBeInTheDocument();
+  });
+
+  it("displays custom badge for custom exercises", () => {
+    render(<ExerciseList exercises={mockExercises} />);
+
+    expect(screen.getAllByText("Custom")).toHaveLength(1);
   });
 
   it("calls onExerciseClick when card is clicked", () => {
