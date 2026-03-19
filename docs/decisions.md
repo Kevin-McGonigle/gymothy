@@ -113,3 +113,23 @@
 
 - **Decision:** Hardcode ExerciseDB base URL (`https://exercisedb.dev/api/v1`) in the service module.
 - **Rationale:** No environment-driven configurability is needed for MVP; keeps implementation simple.
+
+## 17. High-Fidelity In-Memory LibSQL Testing
+
+- **Decision:** Use an in-memory LibSQL client with the production Drizzle migrations applied via a `beforeAll` hook in the test setup.
+- **Rationale:** Ensures that tests verify interactions against the actual database schema (indexes, constraints, etc.) without the overhead of a persistent database or network latency.
+
+## 18. Build vs. Create Factory Pattern
+
+- **Decision:** Formally separate data generation (`build[Entity]`) from database persistence (`create[Entity]`) in test factories.
+- **Rationale:** Allows for high-speed unit tests that only need plain objects, while still providing a clean API for integration tests that require a database state.
+
+## 19. Isolated Query Condition Builders
+
+- **Decision:** Extract complex Drizzle `WHERE` clause logic into pure, standalone functions (e.g., `buildCustomExercisesWhere`).
+- **Rationale:** Improves testability by allowing filtering logic to be verified independently of database execution and adheres to the Single Responsibility Principle.
+
+## 20. Global Mocking for Database Testing
+
+- **Decision:** Use Vitest's `vi.mock` to globally intercept the `@/lib/db` module and inject the in-memory `testDb` instance.
+- **Rationale:** Prioritizes implementation simplicity and keeps production code clean of dependency injection "plumbing," which is acceptable given the project's current scale and complexity.

@@ -6,8 +6,15 @@ export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   test: {
     environment: "jsdom",
-    setupFiles: ["./tests/setup.ts"],
+    setupFiles: ["./tests/setup.ts", "./tests/setup-db.ts"],
     globals: true,
-    exclude: ["**/node_modules/**", "**/tests/e2e/**", "**/*.spec.ts"],
+    exclude: [
+      "**/node_modules/**",
+      "**/tests/e2e/**",
+      "**/*.spec.ts",
+      "**/.agents/**",
+      "**/.claude/**",
+      "**/.gemini/**",
+    ],
   },
 });

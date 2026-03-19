@@ -12,6 +12,9 @@ Use this skill when writing or refactoring tests for Server Actions, API routes,
 ### 1. Data Setup (The "Arrange" Phase)
 
 - **Check Existing Factories**: Before creating a new factory, check `tests/factories/` for an existing implementation of the table's factory.
+- **Build vs. Create Pattern**:
+    - **`build[Entity]`**: Returns a plain object with generated data. Use this for unit tests or when you need to manually handle persistence.
+    - **`create[Entity]`**: Uses the `build` function and then persists the object to the test database. Use this for integration tests.
 - **Prefer Factories over Manual Inserts**: Always use factory functions (e.g., `createExercise()`) to seed data. This ensures required fields and foreign keys are handled automatically.
 - **Specific Overrides**: Only pass the fields relevant to the test case into the factory. Let `@faker-js/faker` handle the noise.
 
