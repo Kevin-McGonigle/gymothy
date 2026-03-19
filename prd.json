@@ -449,28 +449,27 @@
     },
     {
       "id": "TASK-030",
-      "category": "Testing Infrastructure - In-Memory DB",
-      "description": "Set up a high-fidelity Vitest environment using an in-memory SQLite database and global Drizzle mocking to test database-dependent logic without manual dependency injection.",
+      "category": "Testing Infrastructure - In-Memory LibSQL",
+      "description": "Set up a high-fidelity Vitest environment using an in-memory LibSQL database (Turso dialect) and global Drizzle mocking to ensure full compatibility with Turso-specific migrations.",
       "acceptance_criteria": [
-        "Vitest dev dependencies (vitest, better-sqlite3, @faker-js/faker) are installed.",
+        "Vitest dev dependencies (vitest, @libsql/client, @faker-js/faker) are installed.",
         "vitest.config.ts is configured with a 'setupFiles' entry for database initialization.",
-        "A 'tests/setup-db.ts' file is created to manage the test lifecycle.",
-        "An in-memory 'better-sqlite3' instance is initialized within the setup file.",
-        "A Drizzle 'testDb' instance is created using the existing project schema.",
-        "The production '@/lib/db' module is globally intercepted using 'vi.mock'.",
-        "Database migrations from './drizzle' are applied to the in-memory DB in a 'beforeAll' hook.",
-        "A 'clearDb' utility is implemented to programmatically truncate all schema tables.",
-        "The 'clearDb' utility is executed in a 'beforeEach' hook to ensure test isolation.",
-        "An exercise factory utility is created in 'tests/factories/exercise.factory.ts'.",
-        "The exercise factory supports 'Partial' overrides for all schema columns.",
-        "The exercise factory uses '@faker-js/faker' for default value generation.",
+        "A 'tests/setup.ts' file exists to manage the test lifecycle.",
+        "An in-memory LibSQL client is initialized using 'createClient({ url: \":memory:\" })'.",
+        "A Drizzle 'testDb' instance is created using the 'drizzle-orm/libsql' adapter and project schema.",
+        "The production '@/lib/db' module is globally intercepted using 'vi.mock' to provide 'testDb'.",
+        "Database migrations from './drizzle' are successfully applied to the in-memory DB in a 'beforeAll' hook using the LibSQL migrator.",
+        "A 'clearDb' utility is implemented using raw SQL to truncate all schema tables while respecting/disabling foreign key constraints temporarily.",
+        "The 'clearDb' utility is executed in a 'beforeEach' hook to ensure total test isolation.",
+        "An exercise factory utility is created in 'tests/factories/exercise.factory.ts' using '@faker-js/faker'.",
+        "The exercise factory supports 'Partial' overrides to allow tests to control specific fields.",
         "A test suite for 'getCustomExercises' is implemented verifying 'userId' isolation.",
         "A test suite for 'getCustomExercises' is implemented verifying 'search' partial matching.",
         "A test suite for 'getCustomExercises' is implemented verifying 'bodyParts' array/OR logic.",
         "A test suite for 'getCustomExercises' is implemented verifying 'limit' and 'offset' pagination."
       ],
       "dependencies": ["TASK-004", "TASK-008"],
-      "completed": false
+      "completed": true
     },
     {
       "id": "TASK-031",
@@ -667,6 +666,19 @@
         "All remaining code follows the project's established style and conventions."
       ],
       "dependencies": ["TASK-001"],
+      "completed": false
+    },
+    {
+      "id": "TASK-043",
+      "category": "API - Logic",
+      "description": "Improve getCustomExercises query robustness by adding deterministic sorting and robust JSON array searching.",
+      "acceptance_criteria": [
+        "getCustomExercises includes an explicit ORDER BY clause (e.g., updatedAt DESC) for stable pagination.",
+        "JSON array searching for bodyParts, equipments, and targetMuscles is refactored to use more robust matching (e.g., JSON_EACH or exact bounds) to prevent partial word matches.",
+        "Unit tests verify that pagination remains stable across multiple calls.",
+        "Unit tests verify that searching for 'Chest' does not match 'Chestnut'."
+      ],
+      "dependencies": ["TASK-030"],
       "completed": false
     }
   ]

@@ -13,24 +13,21 @@ export type GetCustomExercisesParams = {
   limit?: number;
 };
 
-export async function getCustomExercises(
-  params: GetCustomExercisesParams,
-): Promise<{ data: Exercise[]; total: number }> {
-  const {
-    userId,
-    search,
-    bodyParts,
-    equipments,
-    targetMuscles,
-    offset = 0,
-    limit = 20,
-  } = params;
-
+/**
+ * Builds the where clause for getCustomExercises.
+ * Extracted for testability and SRP.
+ */
+export function buildCustomExercisesWhere(params: {
+  userId: string;
+  search?: string;
+  bodyParts?: string[];
+  equipments?: string[];
+  targetMuscles?: string[];
+}): SQL {
+  const { userId, search, bodyParts, equipments, targetMuscles } = params;
   const normalizedSearch = search?.slice(0, 100) ?? null;
 
-  const baseCondition = eq(exercises.userId, userId);
-
-  let whereClause: SQL = baseCondition;
+  let whereClause: SQL = eq(exercises.userId, userId);
 
   if (normalizedSearch) {
     const escapedSearch = escapeLikePattern(normalizedSearch);
@@ -58,6 +55,16 @@ export async function getCustomExercises(
     );
     whereClause = and(whereClause, or(...muscleConditions)) ?? whereClause;
   }
+
+  return whereClause;
+}
+
+export async function getCustomExercises(
+  params: GetCustomExercisesParams,
+): Promise<{ data: Exercise[]; total: number }> {
+  const { offset = 0, limit = 20 } = params;
+
+  const whereClause = buildCustomExercisesWhere(params);
 
   const [data, countResult] = await Promise.all([
     db.select().from(exercises).where(whereClause).limit(limit).offset(offset),
