@@ -505,7 +505,7 @@
         "Unauthenticated attempts to access protected routes redirect to the landing page."
       ],
       "dependencies": ["TASK-003", "TASK-031"],
-      "completed": false
+      "completed": true
     },
     {
       "id": "TASK-033",

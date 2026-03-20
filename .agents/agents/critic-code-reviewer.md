@@ -1,5 +1,5 @@
 ---
-name: critic
+name: critic-code-reviewer
 description: >
   Performs low-level code quality review during adversarial code review sessions.
   Finds concrete tactical defects: bugs, edge cases, error handling gaps, naming

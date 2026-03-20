@@ -1,5 +1,5 @@
 ---
-name: architect
+name: architect-code-reviewer
 description: >
   Performs structural and architectural code review during adversarial code review
   sessions. Identifies system-level problems: anti-patterns, layer violations,
