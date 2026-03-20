@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { config } from "./config";
 import { db } from "./db";
 
 const trustedOrigins =
@@ -16,5 +17,7 @@ export const auth = betterAuth({
     enabled: true,
   },
   trustedOrigins,
+  baseURL: config.auth.url,
+  secret: config.auth.secret,
   plugins: [nextCookies()],
 });
