@@ -3,17 +3,32 @@ import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
 export async function proxy(request: NextRequest) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
 
-  if (!session) {
-    return NextResponse.redirect(new URL("/", request.url));
+    if (!session) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
+
+    return NextResponse.next();
+  } catch (error) {
+    console.error("Auth proxy error:", error);
+    // Fallback to landing page on error for safety
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    return NextResponse.redirect(url);
   }
-
-  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/history/:path*", "/routines/:path*", "/workout/:path*"],
+  matcher: [
+    "/history/:path*",
+    "/routines/:path*",
+    "/workout/:path*",
+    "/exercises/:path*",
+  ],
 };

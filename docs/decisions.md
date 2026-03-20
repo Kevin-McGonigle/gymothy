@@ -5,6 +5,11 @@
 - **Decision:** Use **Better Auth** with Email/Password provider only for MVP.
 - **Rationale:** Low complexity, meets core requirement of securing user data.
 
+## 1.1 Authentication Performance Optimization
+
+- **Decision:** Defer move to edge-compatible JWT/Cookie-only session validation.
+- **Rationale:** The initial implementation uses `auth.api.getSession` (database-backed) for maximum security and simplicity during the MVP phase. While this adds latency to protected routes, it ensures immediate session invalidation and consistent state. Performance optimization will be revisited if scale requires it.
+
 ## 2. Exercise Database
 
 - **Decision:** Hybrid approach.
