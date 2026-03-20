@@ -487,7 +487,7 @@
         "Browser tab title matches the metadata provided in the root layout."
       ],
       "dependencies": ["TASK-001"],
-      "completed": false
+      "completed": true
     },
     {
       "id": "TASK-032",
