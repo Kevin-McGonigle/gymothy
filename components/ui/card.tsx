@@ -1,3 +1,5 @@
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import type * as React from "react";
 
 import { cn } from "@/lib/utils";
@@ -5,25 +7,33 @@ import { cn } from "@/lib/utils";
 function Card({
   className,
   size = "default",
+  render,
   ref,
   ...props
-}: React.ComponentProps<"div"> & {
+}: useRender.ComponentProps<"div"> & {
   size?: "default" | "sm";
-  ref?: React.Ref<HTMLDivElement>;
+  ref?: React.Ref<HTMLElement>;
 }) {
-  return (
-    <div
-      data-slot="card"
-      data-size={size}
-      ref={ref}
-      className={cn(
-        "group/card flex flex-col gap-4 overflow-hidden rounded-lg bg-card py-4 text-xs/relaxed text-card-foreground ring-1 ring-foreground/10 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 *:[img:first-child]:rounded-t-lg *:[img:last-child]:rounded-b-lg",
-        className,
-      )}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: "div",
+    props: mergeProps<"div">(
+      {
+        ref,
+        className: cn(
+          "group/card flex flex-col gap-4 overflow-hidden rounded-lg bg-card py-4 text-xs/relaxed text-card-foreground ring-1 ring-foreground/10 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 *:[img:first-child]:rounded-t-lg *:[img:last-child]:rounded-b-lg",
+          className,
+        ),
+      },
+      props,
+    ),
+    render,
+    state: {
+      slot: "card",
+      size,
+    },
+  });
 }
+Card.displayName = "Card";
 
 function CardHeader({
   className,
@@ -42,6 +52,7 @@ function CardHeader({
     />
   );
 }
+CardHeader.displayName = "CardHeader";
 
 function CardTitle({
   className,
@@ -57,6 +68,7 @@ function CardTitle({
     />
   );
 }
+CardTitle.displayName = "CardTitle";
 
 function CardDescription({
   className,
@@ -72,6 +84,7 @@ function CardDescription({
     />
   );
 }
+CardDescription.displayName = "CardDescription";
 
 function CardAction({
   className,
@@ -90,6 +103,7 @@ function CardAction({
     />
   );
 }
+CardAction.displayName = "CardAction";
 
 function CardContent({
   className,
@@ -105,6 +119,7 @@ function CardContent({
     />
   );
 }
+CardContent.displayName = "CardContent";
 
 function CardFooter({
   className,
@@ -123,6 +138,7 @@ function CardFooter({
     />
   );
 }
+CardFooter.displayName = "CardFooter";
 
 export {
   Card,

@@ -3,6 +3,8 @@ name: do-a-task
 description: End-to-end workflow for completing a PRD task. Use when asked to work on a task, or when assigned a specific task.
 ---
 
+**When this skill is activated, you MUST adhere rigidly to the following workflow.**
+
 You must complete these phases in order. **Explicit user approval is required to move between phases.**
 
 If, during any phase, you experience ambiguity, uncertainty, or a knowledge gap, you must immediately ask the user for clarification or additional information. Do not make assumptions or proceed without clear understanding.

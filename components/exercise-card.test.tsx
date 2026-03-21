@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { Exercise } from "@/lib/exercises/types";
 import type { ExerciseWithSource } from "@/lib/exercises/use-exercises";
@@ -62,7 +63,15 @@ describe("ExerciseCard", () => {
     expect(screen.queryByText("Custom")).not.toBeInTheDocument();
   });
 
-  it("calls onClick when card is clicked", () => {
+  it("renders as a button by default", () => {
+    render(<ExerciseCard exercise={{ variant: "api", data: mockExercise }} />);
+    const card = screen.getByRole("button");
+    expect(card).toBeInTheDocument();
+    expect(card.nodeName).toBe("BUTTON");
+  });
+
+  it("calls onClick when card is clicked", async () => {
+    const user = userEvent.setup();
     const onClick = vi.fn();
     render(
       <ExerciseCard
@@ -71,11 +80,12 @@ describe("ExerciseCard", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button"));
     expect(onClick).toHaveBeenCalledWith({ ...mockExercise, isCustom: false });
   });
 
-  it("calls onClick with custom exercise data when clicked", () => {
+  it("calls onClick with custom exercise data when clicked", async () => {
+    const user = userEvent.setup();
     const onClick = vi.fn();
     render(
       <ExerciseCard
@@ -84,25 +94,20 @@ describe("ExerciseCard", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button"));
     expect(onClick).toHaveBeenCalledWith(mockCustomExercise);
   });
 
-  it("has minimum touch target when onClick provided", () => {
-    const onClick = vi.fn();
-    render(
-      <ExerciseCard
-        exercise={{ variant: "api", data: mockExercise }}
-        onClick={onClick}
-      />,
-    );
-
+  it("has minimum touch target height", () => {
+    render(<ExerciseCard exercise={{ variant: "api", data: mockExercise }} />);
     const card = screen.getByRole("button");
     expect(card).toHaveClass("min-h-[2.75rem]");
   });
 
-  it("does not have button role when onClick not provided", () => {
+  it("has accessible name from exercise name", () => {
     render(<ExerciseCard exercise={{ variant: "api", data: mockExercise }} />);
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Barbell Bench Press" }),
+    ).toBeInTheDocument();
   });
 });
