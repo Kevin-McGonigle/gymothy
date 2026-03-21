@@ -538,7 +538,7 @@
         "Component tests (e.g., button.test.tsx) verify that refs can be successfully attached."
       ],
       "dependencies": ["TASK-007"],
-      "completed": false
+      "completed": true
     },
     {
       "id": "TASK-035",
