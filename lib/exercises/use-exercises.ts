@@ -1,12 +1,14 @@
 "use client";
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
-  startTransition,
   useCallback,
   useEffect,
   useMemo,
   useState,
+  useTransition,
 } from "react";
+import { z } from "zod";
 import { getCustomExercisesServer } from "./actions";
 import { filterExercises, getExercises } from "./service";
 import type { Exercise } from "./types";
@@ -29,6 +31,7 @@ export interface ExerciseFilters {
 export interface UseExercisesResult {
   exercises: ExerciseWithSource[];
   loading: boolean;
+  isPending: boolean;
   error: Error | null;
   filterOptions: FilterOptions;
   search: string;
@@ -75,6 +78,15 @@ const EMPTY_FILTER_OPTIONS: FilterOptions = Object.freeze({
   targetMuscles: [],
 });
 
+// Zod schema for URL parameters
+const searchParamsSchema = z.object({
+  q: z.string().optional(),
+  page: z.coerce.number().int().positive().optional(),
+  bodyParts: z.string().optional(),
+  equipments: z.string().optional(),
+  targetMuscles: z.string().optional(),
+});
+
 export function useExercises(
   options: UseExercisesOptions = EMPTY_OPTIONS,
 ): UseExercisesResult {
@@ -87,9 +99,44 @@ export function useExercises(
     debounceDelay = DEFAULT_DEBOUNCE_DELAY,
   } = options;
 
-  const [search, setSearchState] = useState(initialSearch);
-  const [filters, setFiltersState] = useState(initialFilters);
-  const [page, setPageState] = useState(initialPage);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  // Validate and parse URL params
+  const parsedParams = useMemo(() => {
+    const raw = {
+      q: searchParams.get("q") || undefined,
+      page: searchParams.get("page") || undefined,
+      bodyParts: searchParams.get("bodyParts") || undefined,
+      equipments: searchParams.get("equipments") || undefined,
+      targetMuscles: searchParams.get("targetMuscles") || undefined,
+    };
+    const result = searchParamsSchema.safeParse(raw);
+    return result.success ? result.data : {};
+  }, [searchParams]);
+
+  // URL state derivation with fallbacks
+  const urlSearch = parsedParams.q ?? initialSearch;
+  const urlPage = parsedParams.page ?? initialPage;
+
+  const filters: ExerciseFilters = useMemo(() => {
+    const bodyParts =
+      parsedParams.bodyParts?.split(",").filter(Boolean) ??
+      initialFilters.bodyParts;
+    const equipments =
+      parsedParams.equipments?.split(",").filter(Boolean) ??
+      initialFilters.equipments;
+    const targetMuscles =
+      parsedParams.targetMuscles?.split(",").filter(Boolean) ??
+      initialFilters.targetMuscles;
+
+    return { bodyParts, equipments, targetMuscles };
+  }, [parsedParams, initialFilters]);
+
+  // Local state for responsive input
+  const [search, setSearchState] = useState(urlSearch);
 
   const [exercises, setExercises] = useState<ExerciseWithSource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -97,14 +144,42 @@ export function useExercises(
   const [filterOptions, setFilterOptions] =
     useState<FilterOptions>(EMPTY_FILTER_OPTIONS);
   const [totalItems, setTotalItems] = useState(0);
-  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
 
+  // Sync URL search to local state (for back/forward navigation)
+  useEffect(() => {
+    setSearchState(urlSearch);
+  }, [urlSearch]);
+
+  // Helper to update URL params
+  const createQueryString = useCallback(
+    (params: Record<string, string | null>) => {
+      const newParams = new URLSearchParams(searchParams.toString());
+
+      for (const [key, value] of Object.entries(params)) {
+        if (value === null || value === "") {
+          newParams.delete(key);
+        } else {
+          newParams.set(key, value);
+        }
+      }
+
+      return newParams.toString();
+    },
+    [searchParams],
+  );
+
+  // Debounced search sync to URL
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedSearch(search);
+      if (search !== urlSearch) {
+        const query = createQueryString({ q: search, page: "1" });
+        startTransition(() => {
+          router.replace(`${pathname}?${query}`);
+        });
+      }
     }, debounceDelay);
     return () => clearTimeout(timer);
-  }, [search, debounceDelay]);
+  }, [search, urlSearch, debounceDelay, router, pathname, createQueryString]);
 
   useEffect(() => {
     let cancelled = false;
@@ -114,7 +189,7 @@ export function useExercises(
       setError(null);
 
       try {
-        const searchQuery = debouncedSearch.slice(0, MAX_SEARCH_LENGTH);
+        const searchQuery = urlSearch.slice(0, MAX_SEARCH_LENGTH);
 
         const [apiResult, customResult] = await Promise.all([
           fetchApiExercises(searchQuery, filters, FILTER_OPTIONS_LIMIT),
@@ -145,7 +220,7 @@ export function useExercises(
 
         const merged = mergeAndDeduplicate(apiExercises, customExercises);
 
-        const offset = (page - 1) * pageSize;
+        const offset = (urlPage - 1) * pageSize;
         const paginated = merged.slice(offset, offset + pageSize);
         setExercises(paginated);
 
@@ -171,40 +246,52 @@ export function useExercises(
     return () => {
       cancelled = true;
     };
-  }, [debouncedSearch, filters, page, userId, pageSize]);
+  }, [urlSearch, filters, urlPage, userId, pageSize]);
 
   const setSearch = useCallback((q: string) => {
-    startTransition(() => {
-      setSearchState(q);
-    });
+    setSearchState(q);
   }, []);
 
-  const setFilters = useCallback((f: ExerciseFilters) => {
-    startTransition(() => {
-      setFiltersState(f);
-      setPageState(1);
-    });
-  }, []);
+  const setFilters = useCallback(
+    (f: ExerciseFilters) => {
+      const query = createQueryString({
+        bodyParts: f.bodyParts.length > 0 ? f.bodyParts.join(",") : null,
+        equipments: f.equipments.length > 0 ? f.equipments.join(",") : null,
+        targetMuscles:
+          f.targetMuscles.length > 0 ? f.targetMuscles.join(",") : null,
+        page: "1",
+      });
+      startTransition(() => {
+        router.push(`${pathname}?${query}`);
+      });
+    },
+    [router, pathname, createQueryString],
+  );
 
-  const setPage = useCallback((p: number) => {
-    startTransition(() => {
-      setPageState(p);
-    });
-  }, []);
+  const setPage = useCallback(
+    (p: number) => {
+      const query = createQueryString({ page: p.toString() });
+      startTransition(() => {
+        router.push(`${pathname}?${query}`);
+      });
+    },
+    [router, pathname, createQueryString],
+  );
 
   const pagination: Pagination = useMemo(
     () => ({
-      page,
+      page: urlPage,
       totalPages: Math.max(1, Math.ceil(totalItems / pageSize)),
       totalItems,
       setPage,
     }),
-    [page, totalItems, pageSize, setPage],
+    [urlPage, totalItems, pageSize, setPage],
   );
 
   return {
     exercises,
     loading,
+    isPending,
     error,
     filterOptions,
     search,

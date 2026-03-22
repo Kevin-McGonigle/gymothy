@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { server } from "@/tests/mocks/server";
 import type { Exercise } from "./types";
 import { useExercises } from "./use-exercises";
@@ -30,6 +30,29 @@ const mockApiPaginatedResponse = {
   data: [mockApiExercise],
 };
 
+const mockRouter = {
+  push: vi.fn(),
+  replace: vi.fn(),
+};
+
+let mockSearchParams = new URLSearchParams();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => mockRouter,
+  usePathname: () => "/exercises",
+  useSearchParams: () => mockSearchParams,
+}));
+
+// Update router implementation to sync with searchParams
+mockRouter.push.mockImplementation((url: string) => {
+  const search = url.split("?")[1];
+  mockSearchParams = new URLSearchParams(search);
+});
+mockRouter.replace.mockImplementation((url: string) => {
+  const search = url.split("?")[1];
+  mockSearchParams = new URLSearchParams(search);
+});
+
 vi.mock("./actions", () => ({
   getCustomExercisesServer: vi.fn().mockResolvedValue({
     data: [
@@ -49,6 +72,11 @@ vi.mock("./actions", () => ({
 }));
 
 describe("useExercises", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockSearchParams = new URLSearchParams();
+  });
+
   it("returns exercises from API", async () => {
     server.use(
       http.get(`${BASE_URL}/api/v1/exercises`, () => {
@@ -63,6 +91,86 @@ describe("useExercises", () => {
     expect(result.current.exercises).toHaveLength(1);
     expect(result.current.exercises[0].name).toBe("Barbell Bench Press");
     expect(result.current.exercises[0].isCustom).toBe(false);
+  });
+
+  it("initializes search from URL", async () => {
+    mockSearchParams = new URLSearchParams("q=squat");
+
+    const { result } = renderHook(() => useExercises());
+
+    expect(result.current.search).toBe("squat");
+  });
+
+  it("initializes filters from URL", async () => {
+    mockSearchParams = new URLSearchParams("bodyParts=chest,back");
+
+    const { result } = renderHook(() => useExercises());
+
+    expect(result.current.filters.bodyParts).toEqual(["chest", "back"]);
+  });
+
+  it("initializes page from URL", async () => {
+    mockSearchParams = new URLSearchParams("page=3");
+
+    const { result } = renderHook(() => useExercises());
+
+    expect(result.current.pagination.page).toBe(3);
+  });
+
+  it("updates URL when search changes (with debounce)", async () => {
+    const { result } = renderHook(() => useExercises());
+
+    act(() => {
+      result.current.setSearch("bench");
+    });
+
+    expect(result.current.search).toBe("bench");
+    expect(mockRouter.replace).not.toHaveBeenCalled();
+
+    await waitFor(
+      () => {
+        expect(mockRouter.replace).toHaveBeenCalledWith(
+          expect.stringContaining("q=bench"),
+        );
+      },
+      { timeout: 1000 },
+    );
+  });
+
+  it("updates URL when filters change", async () => {
+    const { result, rerender } = renderHook(() => useExercises());
+
+    act(() => {
+      result.current.setFilters({
+        bodyParts: ["legs"],
+        equipments: [],
+        targetMuscles: [],
+      });
+    });
+
+    expect(mockRouter.push).toHaveBeenCalledWith(
+      expect.stringContaining("bodyParts=legs"),
+    );
+
+    rerender();
+
+    expect(result.current.filters.bodyParts).toContain("legs");
+  });
+
+  it("updates URL when page changes", async () => {
+    const { result, rerender } = renderHook(() => useExercises());
+
+    act(() => {
+      result.current.pagination.setPage(2);
+    });
+
+    expect(mockRouter.push).toHaveBeenCalledWith(
+      expect.stringContaining("page=2"),
+    );
+
+    rerender();
+
+    expect(result.current.pagination.page).toBe(2);
   });
 
   it("returns custom exercises when userId is provided", async () => {
@@ -167,7 +275,7 @@ describe("useExercises", () => {
       }),
     );
 
-    const { result } = renderHook(() => useExercises());
+    const { result, rerender } = renderHook(() => useExercises());
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -180,6 +288,8 @@ describe("useExercises", () => {
         targetMuscles: [],
       });
     });
+
+    rerender();
 
     await waitFor(() => {
       expect(result.current.pagination.page).toBe(1);
@@ -214,7 +324,7 @@ describe("useExercises", () => {
       }),
     );
 
-    const { result } = renderHook(() => useExercises());
+    const { result, rerender } = renderHook(() => useExercises());
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -223,6 +333,8 @@ describe("useExercises", () => {
     act(() => {
       result.current.pagination.setPage(2);
     });
+
+    rerender();
 
     await waitFor(() => {
       expect(result.current.pagination.page).toBe(2);
@@ -241,5 +353,10 @@ describe("useExercises", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.error).toBeInstanceOf(Error);
+  });
+
+  it("exposes isPending state", () => {
+    const { result } = renderHook(() => useExercises());
+    expect(result.current.isPending).toBe(false);
   });
 });

@@ -572,7 +572,7 @@
         "Local 'useState' for these specific filter values is removed from the hook."
       ],
       "dependencies": ["TASK-008"],
-      "completed": false
+      "completed": true
     },
     {
       "id": "TASK-037",

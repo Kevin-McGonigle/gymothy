@@ -138,3 +138,14 @@
 
 - **Decision:** Use Vitest's `vi.mock` to globally intercept the `@/lib/db` module and inject the in-memory `testDb` instance.
 - **Rationale:** Prioritizes implementation simplicity and keeps production code clean of dependency injection "plumbing," which is acceptable given the project's current scale and complexity.
+
+## 21. Defer Test Robustness for URL State Hook
+
+- **Date:** 2026-03-22
+- **Task:** TASK-036 (Exercise Library - Unified Search & Filters)
+- **Decision:** Defer refactoring of `useExercises` tests to be integration-style (State-In/State-Out).
+- **Rationale:**
+  - **Scope:** Primary goal of moving state to URL is achieved and verified.
+  - **Risk:** Major test refactor risks instability and delay.
+  - **Coverage:** Existing tests, while coupled to mocks, provide sufficient confidence for MVP.
+- **Consequences:** Tests remain coupled to `next/navigation` mocks; future refactors will require test updates.
