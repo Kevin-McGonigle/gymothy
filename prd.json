@@ -542,22 +542,6 @@
     },
     {
       "id": "TASK-035",
-      "category": "UI Components",
-      "description": "Optimize interactive UI components for mobile touch targets (44px minimum).",
-      "acceptance_criteria": [
-        "buttonVariants in components/ui/button.tsx is updated for accessible sizing.",
-        "The 'default' size for Button is increased to a minimum height of 44px (e.g., h-11).",
-        "The 'icon' size for Button is increased to a minimum width/height of 44px (e.g., size-11).",
-        "Input component base height in components/ui/input.tsx is increased to 44px.",
-        "All interactive variants (sm, lg) are adjusted to ensure mobile touch targets are >= 44px.",
-        "A visual regression or manual check confirms layout remains consistent after size changes.",
-        "Accessibility tests verify that all interactive elements meet WCAG touch target standards."
-      ],
-      "dependencies": ["TASK-007"],
-      "completed": false
-    },
-    {
-      "id": "TASK-036",
       "category": "Exercise Library - UI Components",
       "description": "Refactor ExerciseCard to use semantic HTML and correct Base UI primitives.",
       "acceptance_criteria": [
@@ -571,10 +555,10 @@
         "exercise-card.test.tsx is updated to assert the root element is a 'button'."
       ],
       "dependencies": ["TASK-007", "TASK-034"],
-      "completed": false
+      "completed": true
     },
     {
-      "id": "TASK-037",
+      "id": "TASK-036",
       "category": "Exercise Library - Unified Search & Filters",
       "description": "Move exercise search and filter state into URL search parameters for navigation persistence.",
       "acceptance_criteria": [
@@ -591,7 +575,7 @@
       "completed": false
     },
     {
-      "id": "TASK-038",
+      "id": "TASK-037",
       "category": "Exercise Library - API Integration",
       "description": "Implement a server-side proxy for ExerciseDB API calls to enhance security and caching.",
       "acceptance_criteria": [
@@ -607,7 +591,7 @@
       "completed": false
     },
     {
-      "id": "TASK-039",
+      "id": "TASK-038",
       "category": "UI Components",
       "description": "Standardize CVA and className merging patterns across all UI components.",
       "acceptance_criteria": [
@@ -622,7 +606,7 @@
       "completed": false
     },
     {
-      "id": "TASK-040",
+      "id": "TASK-039",
       "category": "Infrastructure - Security",
       "description": "Implement runtime environment variable validation using Zod.",
       "acceptance_criteria": [
@@ -638,7 +622,7 @@
       "completed": false
     },
     {
-      "id": "TASK-041",
+      "id": "TASK-040",
       "category": "API - Logic",
       "description": "Refactor Server Actions to return structured result objects instead of throwing errors.",
       "acceptance_criteria": [
@@ -654,7 +638,7 @@
       "completed": false
     },
     {
-      "id": "TASK-042",
+      "id": "TASK-041",
       "category": "Project Hygiene & AI Context",
       "description": "Perform code hygiene cleanup by removing unused imports and redundant configurations.",
       "acceptance_criteria": [
@@ -669,7 +653,7 @@
       "completed": false
     },
     {
-      "id": "TASK-043",
+      "id": "TASK-042",
       "category": "API - Logic",
       "description": "Improve getCustomExercises query robustness by adding deterministic sorting and robust JSON array searching.",
       "acceptance_criteria": [

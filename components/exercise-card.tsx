@@ -44,28 +44,16 @@ export const ExerciseCard = memo(function ExerciseCard({
     }
   }, [onClick, data]);
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        handleClick();
-      }
-    },
-    [handleClick],
-  );
-
   return (
     <Card
+      render={<button type="button" aria-label={data.name || "Exercise"} />}
       className={cn(
-        "overflow-hidden cursor-pointer transition-shadow hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+        "min-h-[2.75rem] overflow-hidden text-left transition-shadow hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
         onClick &&
-          "min-h-[2.75rem] touch-action-manipulation [-webkit-tap-highlight-color:transparent]",
+          "cursor-pointer touch-action-manipulation [-webkit-tap-highlight-color:transparent]",
         className,
       )}
       onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      tabIndex={onClick ? 0 : -1}
-      role={onClick ? "button" : undefined}
     >
       <div className="relative aspect-square w-full overflow-hidden bg-muted">
         {imageLoading && (
