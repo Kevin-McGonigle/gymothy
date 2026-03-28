@@ -174,3 +174,8 @@
 
 - **Decision:** Allow duplicate custom exercise names per user. No uniqueness constraint on `(user_id, name)`.
 - **Rationale:** Users may legitimately create exercises with the same name but different equipment or body part configurations (e.g., "Cable Row" with different equipment). The UI can warn but should not block creation.
+
+## 24. Vitest Projects for Environment Scoping
+
+- **Decision:** Use Vitest v4 `projects` config (not `environmentMatchGlobs`) to scope `jsdom` to component tests (`*.test.tsx`) and `node` to module tests (`*.test.ts`). Each project has its own setup files: component tests get MSW/RTL setup, module tests get DB setup.
+- **Rationale:** `environmentMatchGlobs` was removed in Vitest v4. The `projects` API replaces it with more granular control — each project can have its own environment, setup files, and include patterns.

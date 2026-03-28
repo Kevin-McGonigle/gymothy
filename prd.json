@@ -69,7 +69,7 @@
             "pnpm test:e2e runs without error."
           ],
           "dependencies": ["TASK-002"],
-          "completed": false
+          "completed": true
         },
         {
           "id": "TASK-004",
