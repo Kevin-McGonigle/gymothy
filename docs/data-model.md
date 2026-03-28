@@ -33,6 +33,7 @@ The single source of truth for all movement definitions (Global or Custom).
   - `equipments` (JSON String Array)
   - `image_url` (String, Nullable) — _GIF URL from ExerciseDB. NULL for Custom unless user provides one._
   - `instructions` (JSON String Array, Nullable) — _Step-by-step instructions from ExerciseDB._
+  - `created_at`, `updated_at` (Timestamps)
 - **Indexes:**
   - `external_id` (unique, for sync deduplication)
   - `user_id` (for custom exercise queries)
@@ -106,6 +107,7 @@ Mirrors the Workout structure exactly, but serves as a template.
 
 - `id`, `user_id`, `name`
 - `note` (String, Nullable) — _General instructions for the routine (Tier 1: Template Note)._
+- `created_at`, `updated_at` (Timestamps)
 
 ### RoutineGroup
 
@@ -139,6 +141,7 @@ The brief defines three tiers of notes. Here is how they map to the data model:
   - `user_id` (FK -> User)
   - `exercise_id` (FK -> Exercise)
   - `content` (String)
+  - `created_at`, `updated_at` (Timestamps)
 - **Indexes:**
   - `user_id` + `exercise_id` (unique — one note per user per exercise)
 
@@ -146,7 +149,7 @@ The brief defines three tiers of notes. Here is how they map to the data model:
 
 ## 5. User Preferences & Flags
 
-### UserPreferences
+### UserPreference
 
 Per-account settings that follow the user across devices/sessions.
 
@@ -167,7 +170,7 @@ erDiagram
     User ||--o{ Routine : "has many"
     User ||--o{ Exercise : "owns (custom only)"
     User ||--o{ ExerciseNote : "has many"
-    User ||--|| UserPreferences : "has one"
+    User ||--|| UserPreference : "has one"
 
     Workout ||--|{ WorkoutExerciseGroup : contains
     WorkoutExerciseGroup ||--|{ WorkoutExercise : contains
