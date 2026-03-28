@@ -68,7 +68,7 @@ A logical grouping of exercises. Corresponds to a "Card" in the UI.
   - `id` (UUID)
   - `workout_id` (FK -> Workout)
   - `order_index` (Integer) — _Position of this card in the workout list._
-  - `type` (Inferred) — _If 1 child = Standard; If >1 child = Superset._
+  - `type` (Computed, not stored) — _Derived at read time: 1 child = Standard; >1 child = Superset._
 
 ### WorkoutExercise (The Movement Instance)
 
@@ -118,7 +118,7 @@ Mirrors the Workout structure exactly, but serves as a template.
 ### RoutineSet (Target)
 
 - `id`, `routine_exercise_id`, `order_index`
-- `target_reps`, `target_weight`, `target_duration` (etc.) — _Can be NULL for ad-hoc or fresh routines; the engine will suggest values._
+- `target_reps`, `target_weight`, `target_duration`, `target_distance` — _All nullable. NULL for ad-hoc or fresh routines; the engine will suggest values._
 
 ---
 
