@@ -19,7 +19,9 @@
       "!dist",
       "!build",
       "!.agents",
-      "!.claude"
+      "!.claude",
+      "!playwright-report",
+      "!test-results"
     ]
   },
   "formatter": {
