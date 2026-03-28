@@ -1,0 +1,786 @@
+{
+  "milestones": [
+    {
+      "id": "M0",
+      "name": "Engineering Foundations",
+      "description": "Tooling, test infrastructure, directory structure, UI primitives, PWA shell. No user-facing features.",
+      "tasks": [
+        {
+          "id": "TASK-001",
+          "description": "Dependencies, config, and directory structure. Pull package.json from archive with fixes. Pull and fix all config files. Create module directory structure. Pull shared utilities and DB connection.",
+          "effort": "M",
+          "acceptance_criteria": [
+            "pnpm install succeeds. Dependencies include: drizzle-orm, drizzle-kit, @libsql/client, better-auth, zustand, @base-ui/react, zod, class-variance-authority, clsx, tailwind-merge, lucide-react. Dev deps include: vitest, @playwright/test, msw, @faker-js/faker, @testing-library/react, @testing-library/jest-dom, shadcn.",
+            "tsconfig.json has jsx set to 'preserve'.",
+            "biome.json has noRestrictedImports using glob pattern '@/modules/*/**' for all module internals, plus '@/lib/db' restricted from app/ and components/ layers.",
+            "lefthook.yml runs tsc --noEmit on pre-push.",
+            "next.config.ts has security headers for service worker.",
+            "drizzle.config.ts configured for Turso/LibSQL.",
+            "Directory structure exists: modules/, shared/, components/ui/, lib/.",
+            "cn() importable from @/shared/utils.",
+            "Route constants in shared/constants.ts include all page routes from docs/ux-flows.md (/login, /signup, /routines, /workout/new, /settings).",
+            "Unit conversion utilities in shared/units.ts (kgToLbs, lbsToKg, formatWeight).",
+            "lib/db/index.ts configures Turso connection.",
+            "pnpm lint passes.",
+            "pnpm build passes."
+          ],
+          "dependencies": [],
+          "completed": false
+        },
+        {
+          "id": "TASK-002",
+          "description": "Database schema. Rebuild lib/db/schema.ts from docs/data-model.md using archive as starting point. Apply all conformance fixes. Generate and push migrations.",
+          "effort": "M",
+          "acceptance_criteria": [
+            "Schema matches docs/data-model.md exactly.",
+            "exercises table: imageUrl (not gifUrl), instructions field, indexes on unique external_id, user_id, and name.",
+            "workouts.status enum: 'active', 'completed', 'incomplete', 'discarded'.",
+            "workouts.note, workoutExercises.note, routines.note are nullable (not default empty string).",
+            "workoutSets.feedback is nullable.",
+            "WorkoutExerciseGroup has no persisted type column (type is computed at read time).",
+            "routineExercises has no note column.",
+            "routineSets includes target_reps, target_weight, target_duration, target_distance (all nullable).",
+            "workouts table has composite indexes: (user_id, start_time) and (user_id, status).",
+            "exerciseNotes has unique composite index on (user_id, exercise_id).",
+            "UserPreferences table: id, user_id (unique FK), unit (enum kg/lbs, default kg), onboarding_completed (boolean, default false).",
+            "UserPreferences relation added to user relations.",
+            "pnpm drizzle-kit generate succeeds.",
+            "pnpm drizzle-kit push succeeds against local SQLite."
+          ],
+          "dependencies": ["TASK-001"],
+          "completed": false
+        },
+        {
+          "id": "TASK-003",
+          "description": "Test infrastructure and UI components. Pull and fix vitest/playwright config, test setup files, factories, MSW server. Pull all components/ui/* from archive with fixes. All component tests pass.",
+          "effort": "L",
+          "acceptance_criteria": [
+            "vitest.config.ts scopes jsdom environment to component tests only (module tests use Node).",
+            "playwright.config.ts has mobile viewports enabled.",
+            "tests/setup.ts configures MSW with onUnhandledRequest: 'error'.",
+            "tests/setup-db.ts configures in-memory LibSQL with migration and per-test cleanup.",
+            "Factories in tests/factories/ for: user, exercise, routine, routineGroup, routineExercise, routineSet, workout, workoutExerciseGroup, workoutExercise, workoutSet, userPreferences. All follow build/create pattern.",
+            "MSW mock server configured in tests/mocks/server.ts.",
+            "components/ui/ contains: button, card, badge, input, spinner, skeleton, empty, dialog (for confirmation flows).",
+            "card.tsx and badge.tsx have 'use client' directive.",
+            "empty.tsx has ref forwarding, correct type on EmptyDescription, and a test file.",
+            "All component tests pass via pnpm test.",
+            "pnpm test:e2e runs without error."
+          ],
+          "dependencies": ["TASK-002"],
+          "completed": false
+        },
+        {
+          "id": "TASK-004",
+          "description": "PWA shell. Create app/manifest.ts using Next.js built-in manifest API. Create public/sw.js service worker for shell caching. Verify installability criteria.",
+          "effort": "S",
+          "stories": ["US-NAV-5"],
+          "acceptance_criteria": [
+            "app/manifest.ts exports a valid web app manifest with app name, icons, display: 'standalone', theme color.",
+            "public/sw.js exists with shell caching logic.",
+            "next.config.ts has security headers for /sw.js (Content-Type, Cache-Control, CSP).",
+            "App meets browser PWA installability criteria when running via pnpm dev.",
+            "No third-party PWA dependencies added."
+          ],
+          "dependencies": ["TASK-001"],
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": "M1",
+      "name": "App Shell & Auth",
+      "description": "User can sign up, sign in, navigate between tabs, see empty states, and be redirected appropriately. First E2E tests.",
+      "tasks": [
+        {
+          "id": "TASK-005",
+          "description": "Auth module. Create modules/auth/ wrapping Better Auth with an opaque public API. lib/auth.ts and lib/auth-client.ts are infrastructure (Better Auth config); modules/auth/index.ts re-exports domain-level operations. Separate server and client entry points. Create UserPreferences row on sign-up. Own UserPreferences CRUD.",
+          "effort": "M",
+          "stories": ["US-AUTH-1", "US-AUTH-2", "US-AUTH-3"],
+          "acceptance_criteria": [
+            "lib/auth.ts configures Better Auth server with Drizzle adapter, emailAndPassword enabled. No explicit baseURL/secret (reads from env).",
+            "lib/auth-client.ts configures createAuthClient() with no explicit baseURL.",
+            "modules/auth/index.ts (server) exports signIn, signUp, signOut, getSession, getUserPreferences, updateUserPreferences.",
+            "modules/auth/client.ts (client, 'use client') exports useSession.",
+            "Auth route handler at app/api/auth/[...all]/route.ts using toNextJsHandler.",
+            "UserPreferences row with defaults created on sign-up via databaseHooks.",
+            "Auth tables are not modified directly — only Better Auth manages them.",
+            "Integration tests verify: sign-up creates user and preferences, sign-in returns session, getUserPreferences returns defaults, updateUserPreferences persists changes."
+          ],
+          "dependencies": ["TASK-002", "TASK-003"],
+          "completed": false
+        },
+        {
+          "id": "TASK-006",
+          "description": "Auth pages. Create /login and /signup pages with email/password forms. Inline validation errors. Link between login and signup.",
+          "effort": "M",
+          "stories": ["US-AUTH-1", "US-AUTH-2"],
+          "acceptance_criteria": [
+            "app/(auth)/login/page.tsx renders a sign-in form with email and password fields.",
+            "app/(auth)/signup/page.tsx renders a sign-up form with email and password fields.",
+            "Invalid credentials show inline error messages without page reload.",
+            "Duplicate email on sign-up shows inline error.",
+            "Login page has link to sign-up and vice versa.",
+            "Successful sign-up redirects to / (History).",
+            "Successful sign-in redirects to / (History).",
+            "Component tests verify form rendering, error display, and navigation links."
+          ],
+          "dependencies": ["TASK-005"],
+          "completed": false
+        },
+        {
+          "id": "TASK-007",
+          "description": "Route protection and redirects. Pull and fix proxy.ts middleware. Protect /routines, /workout/*, /settings/*. Redirect unauthenticated to /login. Redirect authenticated from /login and /signup to /.",
+          "effort": "S",
+          "stories": ["US-AUTH-4", "US-AUTH-5"],
+          "acceptance_criteria": [
+            "Middleware protects /routines, /workout/*, /settings/* routes.",
+            "Unauthenticated requests to protected routes redirect to /login.",
+            "Authenticated requests to /login or /signup redirect to /.",
+            "Root route / is not in the middleware matcher — auth is handled at the page level (/ serves as landing for unauth, History for auth).",
+            "No /history or /exercises routes in the matcher.",
+            "Unit tests verify redirect behavior for authenticated and unauthenticated states."
+          ],
+          "dependencies": ["TASK-005"],
+          "completed": false
+        },
+        {
+          "id": "TASK-008",
+          "description": "Navigation shell and empty states. Bottom nav bar with History and Routines tabs plus elevated Start Workout action. Burger menu with Settings and Sign Out. Tab bar hidden during Focus Mode (CSS mechanism only). Stub pages for /, /routines, /settings with empty states.",
+          "effort": "L",
+          "stories": ["US-NAV-1", "US-NAV-2", "US-NAV-3", "US-NAV-4", "US-AUTH-3"],
+          "acceptance_criteria": [
+            "Authenticated layout includes a bottom navigation bar.",
+            "Nav bar has History tab, Routines tab, and a visually elevated Start Workout action.",
+            "Tapping History navigates to /, Routines to /routines, Start Workout to /workout/new.",
+            "Active tab is visually indicated.",
+            "Burger menu accessible from the nav area with links to Settings and Sign Out.",
+            "Sign Out clears session and redirects to /login.",
+            "/ (History) shows empty state with onboarding cues when no workouts exist.",
+            "/routines shows empty state with 'Create your first Routine' CTA.",
+            "/settings page exists as a stub.",
+            "/workout/new page exists as a stub.",
+            "A CSS mechanism hides the nav bar for /workout/[id] routes (Focus Mode prep).",
+            "Component tests verify nav bar rendering, active state, and empty states."
+          ],
+          "dependencies": ["TASK-003", "TASK-006", "TASK-007"],
+          "completed": false
+        },
+        {
+          "id": "TASK-009",
+          "description": "E2E smoke tests. Playwright tests for auth flows and navigation. Establish auth test setup project with storageState for future E2E tests.",
+          "effort": "M",
+          "stories": ["US-AUTH-1", "US-AUTH-2", "US-AUTH-3", "US-AUTH-4", "US-AUTH-5", "US-NAV-1", "US-NAV-2", "US-NAV-3"],
+          "acceptance_criteria": [
+            "Playwright auth setup project creates a test user and saves storageState.",
+            "E2E test: sign up with new email -> lands on History empty state.",
+            "E2E test: sign in with existing credentials -> lands on History.",
+            "E2E test: unauthenticated visit to /routines -> redirected to /login.",
+            "E2E test: authenticated visit to /login -> redirected to /.",
+            "E2E test: tap Routines tab -> navigates to /routines.",
+            "E2E test: tap History tab -> navigates to /.",
+            "E2E test: sign out via menu -> redirected to /login.",
+            "All E2E tests pass on mobile viewport."
+          ],
+          "dependencies": ["TASK-008"],
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Data Layer",
+      "description": "ExerciseDB data indexed locally. Exercises module with public API for querying. All tested against real schema.",
+      "tasks": [
+        {
+          "id": "TASK-010",
+          "description": "Exercises module — core queries. Create modules/exercises/ with public API (index.ts). Implement: get exercises (paginated, searchable, filterable by body part/equipment/target muscle), get exercise by ID. Return ExerciseDTO. Domain-specific errors.",
+          "effort": "L",
+          "stories": ["US-EX-1", "US-EX-8"],
+          "acceptance_criteria": [
+            "modules/exercises/index.ts exports getExercises, getExerciseById.",
+            "getExercises accepts optional userId; when provided, results include global exercises (externalId not null) AND custom exercises belonging to that user (userId matches). Other users' custom exercises are excluded.",
+            "getExercises supports pagination (offset/limit), text search on name, and filters for bodyParts, equipments, targetMuscles.",
+            "Filters use AND logic across categories (e.g., bodyPart=chest AND equipment=barbell).",
+            "Returns ExerciseDTO (opaque type, no Drizzle table types exported).",
+            "Throws domain-specific errors (ExerciseNotFoundError).",
+            "Integration tests cover: search, each filter type, combined filters, pagination, exercise by ID, empty results, userId scoping (custom exercises only visible to their owner)."
+          ],
+          "dependencies": ["TASK-002"],
+          "completed": false
+        },
+        {
+          "id": "TASK-011",
+          "description": "ExerciseDB indexing service. Import function within modules/exercises/ that fetches the full ExerciseDB dataset and upserts into the local database. Includes type inference mapping (equipment -> exercise type). Idempotent.",
+          "effort": "M",
+          "stories": ["US-EX-1"],
+          "acceptance_criteria": [
+            "An indexExerciseDb function exists in modules/exercises/.",
+            "Fetches all exercises from ExerciseDB API (paginated, handles full dataset).",
+            "Maps ExerciseDB response fields to local schema (exerciseId -> externalId, gifUrl -> imageUrl, etc.).",
+            "Infers exercise type from equipment value per docs/data-model.md mapping (body weight -> bodyweight_reps, assisted -> assisted_bodyweight, weighted -> weighted_bodyweight, cardio equipment -> duration, all others -> weight_reps).",
+            "Upserts by externalId — safe to re-run without duplicates.",
+            "package.json includes a db:seed script that executes the indexing function.",
+            "Tests use MSW to mock ExerciseDB API responses and verify correct mapping and upsert behavior."
+          ],
+          "dependencies": ["TASK-010"],
+          "completed": false
+        },
+        {
+          "id": "TASK-012",
+          "description": "Exercises module — comprehensive integration tests. Test the full public interface of modules/exercises/ with realistic seeded data. Covers edge cases and all query paths.",
+          "effort": "M",
+          "stories": ["US-EX-1"],
+          "acceptance_criteria": [
+            "All tests import from modules/exercises/index.ts only — no internal imports.",
+            "Tests use exercise factory to seed realistic data (mix of global and custom exercises).",
+            "Coverage: text search partial matching, each filter type individually, combined filters, pagination boundaries, empty result sets, userId scoping for custom exercises.",
+            "Edge cases: special characters in search, exercises with multiple body parts/muscles, pagination with filters applied.",
+            "All tests pass via pnpm test."
+          ],
+          "dependencies": ["TASK-011"],
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": "M3",
+      "name": "Routines",
+      "description": "First feature end-to-end. User can browse exercises, create routines with targets, view routine details, and delete routines.",
+      "tasks": [
+        {
+          "id": "TASK-013",
+          "description": "Routines module. Create modules/routines/ with public API. CRUD: create routine (name, userId), list routines by user, get routine by ID (full hierarchy: groups -> exercises -> sets), delete routine (cascade), add exercise to routine (creates group + exercise + default set), update set targets. DTOs and domain errors. Integration tests.",
+          "effort": "L",
+          "stories": ["US-RT-1", "US-RT-2", "US-RT-3", "US-RT-4", "US-RT-5", "US-RT-6"],
+          "acceptance_criteria": [
+            "modules/routines/index.ts exports createRoutine, getRoutines, getRoutineById, deleteRoutine, addExerciseToRoutine, updateSetTargets.",
+            "createRoutine accepts name and userId, returns RoutineDTO.",
+            "getRoutines returns list of RoutineSummaryDTO (id, name, exercise count) for a user.",
+            "getRoutineById returns full hierarchy: RoutineDetailDTO with groups, exercises, and sets.",
+            "deleteRoutine cascades to all child records.",
+            "addExerciseToRoutine creates a new group (order_index = max existing + 1) with one exercise and one default set.",
+            "updateSetTargets updates target_reps/target_weight/target_duration/target_distance on a RoutineSet.",
+            "Domain errors: RoutineNotFoundError, UnauthorizedRoutineAccessError.",
+            "Routine/RoutineGroup/RoutineExercise/RoutineSet factories created in tests/factories/.",
+            "Integration tests cover all public functions with edge cases (empty routine, multiple groups, unauthorized access).",
+            "If this task exceeds context limits, split at read path (create/get/list) vs. write path (add exercise/update targets/delete)."
+          ],
+          "dependencies": ["TASK-010"],
+          "completed": false
+        },
+        {
+          "id": "TASK-014",
+          "description": "Exercise browser component. Pull and rework archive exercise-card and exercise-list into modules/exercises/components/. Build search/filter UI: debounced search input, filter dropdowns (body part, equipment, target muscle), results list. Wrap as a reusable sheet/modal for in-context use. Component tests.",
+          "effort": "M",
+          "stories": ["US-EX-2", "US-EX-3", "US-EX-4", "US-EX-5", "US-EX-6"],
+          "acceptance_criteria": [
+            "modules/exercises/components/ contains ExerciseCard, ExerciseList, ExerciseBrowser.",
+            "ExerciseCard accepts ExerciseDTO (no variant discriminated union). Custom exercises visually distinguished via userId check.",
+            "No arbitrary CSS values (min-h-[2.75rem] replaced with min-h-11 or equivalent).",
+            "ExerciseBrowser includes: debounced search input, body part filter, equipment filter, target muscle filter, paginated results.",
+            "ExerciseBrowser accepts an onSelect callback for embedding in routine builder and workout flows.",
+            "Filter options derived from the exercise dataset.",
+            "Component tests verify rendering, search interaction, filter application, selection callback, custom badge display."
+          ],
+          "dependencies": ["TASK-010"],
+          "completed": false
+        },
+        {
+          "id": "TASK-015",
+          "description": "Routine pages and server actions. /routines list page (real data, replaces stub). /routines/new builder page with exercise browser integration. /routines/[id] detail view. Server actions as thin orchestrators for create, add exercise, set targets, delete.",
+          "effort": "L",
+          "stories": ["US-RT-1", "US-RT-2", "US-RT-3", "US-RT-4", "US-RT-5", "US-RT-6"],
+          "acceptance_criteria": [
+            "/routines shows user's routines list (name, exercise count). Empty state if none.",
+            "/routines/new renders routine builder: name input, 'Add Exercise' button opens exercise browser, set target inputs per exercise.",
+            "Selecting an exercise in the browser adds it to the routine as a new group.",
+            "Saving the routine persists all data and redirects to /routines/[id].",
+            "/routines/[id] displays full routine detail: groups, exercises, target values.",
+            "Delete action with confirmation removes routine and redirects to /routines.",
+            "Server actions validate session, call routines module, revalidate/redirect. No business logic in actions.",
+            "Component tests for builder form interactions and detail view rendering.",
+            "If this task exceeds context limits, split into: (a) /routines list + /routines/[id] detail, (b) /routines/new builder."
+          ],
+          "dependencies": ["TASK-013", "TASK-014"],
+          "completed": false
+        },
+        {
+          "id": "TASK-016",
+          "description": "Routines E2E tests. Full user flows: create routine with exercises and targets, view detail, delete. Exercise search and filter within the builder.",
+          "effort": "M",
+          "stories": ["US-RT-1", "US-RT-2", "US-RT-3", "US-RT-4", "US-RT-5", "US-RT-6", "US-EX-2", "US-EX-3", "US-EX-4", "US-EX-5", "US-EX-6"],
+          "acceptance_criteria": [
+            "E2E test: navigate to /routines -> see empty state CTA.",
+            "E2E test: create routine -> name it -> add exercise via browser -> set targets -> save -> see detail.",
+            "E2E test: search for exercise by name in browser -> results update.",
+            "E2E test: filter exercises by body part -> results narrow.",
+            "E2E test: delete routine -> confirm -> redirected to /routines.",
+            "All E2E tests pass on mobile viewport."
+          ],
+          "dependencies": ["TASK-015"],
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": "M4",
+      "name": "Active Workout",
+      "description": "Core feature. User can start a workout from a routine or empty, use Focus Mode carousel, log sets, and finish. Session persisted to localStorage.",
+      "tasks": [
+        {
+          "id": "TASK-017",
+          "description": "Workouts module. Create modules/workouts/ with public API. Full workout lifecycle: start, log, complete, finish, discard. Query active workouts and history for exercise. DTOs and domain errors. Integration tests.",
+          "effort": "L",
+          "stories": ["US-WK-2", "US-WK-3", "US-WK-6", "US-WK-7", "US-WK-8"],
+          "acceptance_criteria": [
+            "modules/workouts/index.ts exports startWorkout, startEmptyWorkout, getWorkoutById, updateSet, completeSet, finishWorkout, discardWorkout, addExerciseToWorkout, getActiveWorkoutForUser, getLastSessionForExercise.",
+            "startWorkout accepts routineId and userId, creates workout with groups/exercises/sets mirroring the routine template. Workout name copied from routine name.",
+            "startEmptyWorkout creates a workout with no groups. Name defaults to a date-based string.",
+            "getWorkoutById returns WorkoutDetailDTO with full hierarchy.",
+            "updateSet persists weight/reps/distance/duration to a specific set.",
+            "completeSet marks a set as completed.",
+            "finishWorkout sets status to 'completed' and records end_time.",
+            "discardWorkout sets status to 'discarded'.",
+            "addExerciseToWorkout adds a new group with one exercise and one default set to an existing active workout.",
+            "getActiveWorkoutForUser returns the most recent active workout for a user (if any), for resume/staleness evaluation.",
+            "getLastSessionForExercise returns the most recent completed set data and feedback for a given exercise and user, for progression engine input.",
+            "Domain errors: WorkoutNotFoundError, WorkoutAlreadyCompletedError.",
+            "Workout/WorkoutExerciseGroup/WorkoutExercise/WorkoutSet factories created in tests/factories/.",
+            "Integration tests cover: start from routine (name copied), start empty (name generated), update set, complete set, finish, discard, add exercise, get active workout, get last session, error cases.",
+            "Known limitation: totalVolume (weight * reps) excludes bodyweight_reps exercises (weight is null) and duration exercises. Documented in code comments."
+          ],
+          "dependencies": ["TASK-013"],
+          "completed": false
+        },
+        {
+          "id": "TASK-018",
+          "description": "Workout session store. Zustand store in modules/workouts/ for active workout state. Initialize from routine template or empty. Track groups/exercises/sets with local mutations. Mirror to localStorage. Restore on load. Define client-server sync strategy.",
+          "effort": "M",
+          "stories": ["US-WK-9"],
+          "acceptance_criteria": [
+            "useWorkoutSession Zustand store exists in modules/workouts/client.ts ('use client').",
+            "Client entry point is modules/workouts/client.ts — consumers import the store from there directly. Not re-exported from index.ts (server/client boundary).",
+            "initFromRoutine action populates store from a routine template.",
+            "initEmpty action creates a blank workout.",
+            "updateSet, completeSet actions mutate local state immediately.",
+            "Store state is mirrored to localStorage via Zustand persist middleware.",
+            "On load, store checks localStorage and restores active session if present.",
+            "lastUpdated timestamp updated on every mutation (for resume logic).",
+            "Sync strategy: optimistic local mutations via Zustand; background server action fired on each set completion to persist; full persist on finish. Decision recorded in docs/decisions.md.",
+            "Unit tests verify state transitions, localStorage persistence, restoration, and lastUpdated behavior."
+          ],
+          "dependencies": ["TASK-017"],
+          "completed": false
+        },
+        {
+          "id": "TASK-019",
+          "description": "Focus Mode UI. /workout/new start screen (routine list + Start Empty Workout). /workout/[id] Focus Mode: horizontal carousel, set logging, finish. Server actions for start and finish.",
+          "effort": "L",
+          "stories": ["US-WK-1", "US-WK-2", "US-WK-3", "US-WK-4", "US-WK-5", "US-WK-6", "US-WK-7", "US-WK-8"],
+          "acceptance_criteria": [
+            "/workout/new shows list of user's routines + 'Start Empty Workout' option.",
+            "Selecting a routine creates a workout and redirects to /workout/[id].",
+            "/workout/[id] renders Focus Mode with bottom nav bar hidden.",
+            "Carousel displays one WorkoutExerciseGroup card at a time.",
+            "Previous/Next buttons and swipe gestures navigate between cards.",
+            "Each card shows exercise name and set rows with conditional inputs per exercise type: weight_reps/weighted_bodyweight/assisted_bodyweight show weight+reps, bodyweight_reps shows reps only, duration shows duration, distance_time shows distance+duration.",
+            "Input fields use appropriate inputmode (decimal for weight, numeric for reps).",
+            "Completion checkbox marks set as completed in Zustand store and fires background server action to persist.",
+            "Finish button completes the workout and returns to / (History).",
+            "Carousel uses CSS scroll-snap for card alignment.",
+            "Server actions (start workout, finish workout) validate session, call workouts module, redirect. No business logic.",
+            "Component tests for carousel navigation, conditional input rendering per exercise type, and completion flow.",
+            "If this task exceeds context limits, split into: (a) /workout/new + start server action, (b) /workout/[id] carousel + inputs + finish."
+          ],
+          "dependencies": ["TASK-018"],
+          "completed": false
+        },
+        {
+          "id": "TASK-020",
+          "description": "Active workout E2E tests. Full user flows: start from routine, navigate carousel, log a set, complete it, finish workout. Start empty workout. Session persistence across page reload.",
+          "effort": "M",
+          "stories": ["US-WK-1", "US-WK-2", "US-WK-3", "US-WK-4", "US-WK-5", "US-WK-6", "US-WK-7", "US-WK-8", "US-WK-9"],
+          "acceptance_criteria": [
+            "E2E test: start workout from routine -> see first exercise card in carousel.",
+            "E2E test: navigate to next card via button -> card changes.",
+            "E2E test: enter weight and reps -> check completion box -> set marked complete.",
+            "E2E test: finish workout -> redirected to History -> workout appears in feed.",
+            "E2E test: start empty workout -> Focus Mode loads with no cards.",
+            "E2E test: mid-workout page reload -> session restored from localStorage.",
+            "All E2E tests pass on mobile viewport."
+          ],
+          "dependencies": ["TASK-019"],
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": "M5",
+      "name": "History",
+      "description": "Close the loop. User can see past workouts in a chronological feed with incomplete badges. Active sessions auto-resume.",
+      "tasks": [
+        {
+          "id": "TASK-021",
+          "description": "History feed. Extend modules/workouts/ with queries for completed/incomplete workouts (paginated, most recent first, with summary: total volume, exercise names). Update / (History) page to show real workout feed replacing the empty state stub. Incomplete badge. Integration tests for summary query.",
+          "effort": "M",
+          "stories": ["US-HI-1", "US-HI-2", "US-HI-3"],
+          "acceptance_criteria": [
+            "modules/workouts/index.ts exports getWorkoutHistory.",
+            "getWorkoutHistory returns paginated list of WorkoutSummaryDTO (id, name, startTime, totalVolume, exerciseNames, status).",
+            "totalVolume calculated as sum of (weight * reps) across all completed sets. Known limitation: bodyweight and duration exercises contribute zero volume (documented).",
+            "Results ordered by startTime descending.",
+            "/ (History) page renders real workout feed when data exists, empty state when none.",
+            "Workouts with status 'incomplete' display a visual badge.",
+            "Integration tests cover: feed ordering, volume calculation, incomplete status filtering, pagination, empty results.",
+            "Component tests verify feed rendering and incomplete badge display."
+          ],
+          "dependencies": ["TASK-017"],
+          "completed": false
+        },
+        {
+          "id": "TASK-022",
+          "description": "Auto-resume active session. On app load, check for active workout with < 2 hours inactivity. Redirect to Focus Mode if found, bypassing History. Sessions > 2h are not redirected (handled by TASK-031 in M7; until then, they remain in localStorage without user-facing indication).",
+          "effort": "S",
+          "stories": ["US-RS-1"],
+          "acceptance_criteria": [
+            "Authenticated layout checks localStorage for active workout session on mount.",
+            "If session exists and lastUpdated is < 2 hours ago, redirect to /workout/[id].",
+            "If no active session or > 2 hours, render normally (History page).",
+            "Fallback: if localStorage is empty, query server via getActiveWorkoutForUser. If active workout found with < 2h, redirect. Known limitation: > 2h server-side sessions are not surfaced until TASK-031.",
+            "Redirect happens before History content renders (no flash of wrong content).",
+            "Unit tests verify the time-threshold logic and server fallback path."
+          ],
+          "dependencies": ["TASK-018"],
+          "completed": false
+        },
+        {
+          "id": "TASK-023",
+          "description": "History E2E tests. Complete a workout then verify it appears in the feed. Verify incomplete badge. Auto-resume redirect.",
+          "effort": "M",
+          "stories": ["US-HI-1", "US-HI-2", "US-HI-3", "US-RS-1"],
+          "acceptance_criteria": [
+            "E2E test: complete a workout -> appears in History feed with name, date, volume.",
+            "E2E test: workout with incomplete status shows badge in feed.",
+            "E2E test: start workout -> leave app -> reopen within 2h -> auto-redirected to Focus Mode.",
+            "All E2E tests pass on mobile viewport."
+          ],
+          "dependencies": ["TASK-021", "TASK-022"],
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": "M6",
+      "name": "Feedback & Progression",
+      "description": "The magic. Feedback prompt after sets, deterministic progression engine, smart defaults pre-filling workout inputs.",
+      "tasks": [
+        {
+          "id": "TASK-024",
+          "description": "Progression module. Create modules/progression/ with deterministic engine. Calculate next-session targets based on previous session feedback. Accept compound/isolation classification as a parameter (see pending decision in decisions.md). Discovery mode for exercises with no history. Pure functions, comprehensive unit tests.",
+          "effort": "M",
+          "stories": ["US-PR-1", "US-PR-2", "US-PR-3"],
+          "acceptance_criteria": [
+            "modules/progression/index.ts exports calculateProgression.",
+            "calculateProgression accepts previous session data (weight, reps, feedback), exercise type, and movement category (compound/isolation) as parameters. Returns suggested weight and reps.",
+            "too_easy feedback: ~5-10% volume increase.",
+            "solid feedback: ~2.5-5% volume increase.",
+            "struggle feedback: maintain current volume.",
+            "failure feedback: maintain or slight decrease.",
+            "When movement category is compound: constrain to 6-10 reps. When isolation: constrain to 8-12 reps.",
+            "Discovery mode: returns null/blank targets when no history exists.",
+            "Unit tests cover all feedback paths, rep range constraints for both categories, edge cases (zero weight, boundary reps), and discovery mode."
+          ],
+          "dependencies": [],
+          "completed": false
+        },
+        {
+          "id": "TASK-025",
+          "description": "Feedback prompt UI. Add feedback overlay to Focus Mode carousel. Triggers on last set completion. Options: Too Easy, Solid, Struggle, Failure. Saves feedback to the set. Auto-advances carousel. Swipe-past defaults to solid.",
+          "effort": "M",
+          "stories": ["US-WK-12"],
+          "acceptance_criteria": [
+            "Feedback overlay appears when the last set of an exercise is marked completed.",
+            "Overlay displays four options: Too Easy, Solid, Struggle, Failure.",
+            "Selecting an option saves the feedback value to the last set (via Zustand store + server sync).",
+            "Selecting an option auto-advances the carousel to the next card.",
+            "Swiping past without selecting defaults feedback to 'solid'.",
+            "Overlay is non-modal — manual swiping is not blocked.",
+            "Component tests verify overlay trigger, option selection, auto-advance, and default behavior."
+          ],
+          "dependencies": ["TASK-019"],
+          "completed": false
+        },
+        {
+          "id": "TASK-026",
+          "description": "Smart defaults integration. Wire progression engine into workout start. Pre-fill set inputs with progression-adjusted targets based on previous session data and feedback. Discovery mode for new exercises.",
+          "effort": "S",
+          "stories": ["US-PR-1", "US-WK-13"],
+          "acceptance_criteria": [
+            "When starting a workout from a routine, set inputs are pre-filled with progression targets from the user's most recent session for each exercise (via getLastSessionForExercise from TASK-017).",
+            "Targets are calculated via the progression module using the previous session's feedback.",
+            "Suggested values displayed as placeholder/ghost text (distinct from user-entered values).",
+            "Exercises with no history show blank inputs (Discovery mode).",
+            "Integration test: seed previous workout data with feedback, start new workout, verify pre-filled targets match progression logic."
+          ],
+          "dependencies": ["TASK-024", "TASK-019"],
+          "completed": false
+        },
+        {
+          "id": "TASK-027",
+          "description": "Feedback & Progression E2E tests. Full feedback-to-progression loop. Verify smart defaults reflect previous session's feedback.",
+          "effort": "M",
+          "stories": ["US-WK-12", "US-WK-13", "US-PR-1", "US-PR-2"],
+          "acceptance_criteria": [
+            "E2E test: complete last set of exercise -> feedback overlay appears -> select 'Too Easy' -> carousel auto-advances.",
+            "E2E test: swipe past feedback overlay -> feedback defaults to 'solid'.",
+            "E2E test: complete workout with feedback -> start new workout with same exercises -> inputs pre-filled with progression-adjusted values.",
+            "E2E test: exercise with no history -> inputs are blank (Discovery mode).",
+            "All E2E tests pass on mobile viewport."
+          ],
+          "dependencies": ["TASK-026"],
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": "M7",
+      "name": "Augmentation",
+      "description": "Enhancements across all features. Rest timer, overview mode, resume logic, heatmap, editing, supersets, notes, custom exercises.",
+      "tasks": [
+        {
+          "id": "TASK-028",
+          "description": "Workout session enhancements. Progress indicator bar reflecting current card position. Add/remove sets during active workout. Discard workout with confirmation dialog.",
+          "effort": "M",
+          "stories": ["US-WK-10", "US-WK-15", "US-WK-18"],
+          "acceptance_criteria": [
+            "Progress bar at the top of Focus Mode reflects current card position (e.g., Card 3 of 8).",
+            "Add Set button on each exercise card appends a new set row.",
+            "Remove set action removes a set (with confirmation if data entered).",
+            "Discard button triggers confirmation dialog. On confirm, calls discardWorkout from workouts module, redirect to History.",
+            "Component tests for progress bar, add/remove set interactions, discard flow."
+          ],
+          "dependencies": ["TASK-019"],
+          "completed": false
+        },
+        {
+          "id": "TASK-029",
+          "description": "Rest timer. Auto-starts on set completion. Non-intrusive floating pill overlay. +30s and Skip controls. Visual indicator when timer hits zero.",
+          "effort": "M",
+          "stories": ["US-WK-11"],
+          "acceptance_criteria": [
+            "Rest timer countdown starts automatically when a set is marked completed.",
+            "Timer displayed as a floating pill at the bottom of Focus Mode.",
+            "+30s button extends the timer. Skip button dismisses it.",
+            "Visual change (color/flash) when timer reaches zero.",
+            "Timer does not block carousel navigation or other interactions.",
+            "Component tests verify auto-start, controls, and zero-state indicator."
+          ],
+          "dependencies": ["TASK-019"],
+          "completed": false
+        },
+        {
+          "id": "TASK-030",
+          "description": "Overview mode and mid-workout additions. List view toggle in Focus Mode. Add exercises during active workout via exercise browser (uses addExerciseToWorkout from workouts module). Save ad-hoc workout as new routine on completion (server action orchestrates: fetch from workouts module, pass to routines module).",
+          "effort": "M",
+          "stories": ["US-WK-14", "US-WK-16", "US-WK-17"],
+          "acceptance_criteria": [
+            "Toggle button switches between Carousel and vertical list (Overview) view.",
+            "Overview shows all exercise groups in a scrollable list.",
+            "Add Exercise button opens the exercise browser (from TASK-014) within the active workout.",
+            "Selected exercise added via addExerciseToWorkout from workouts module.",
+            "On finishing an ad-hoc workout (not started from a routine), a 'Save as Routine' option appears.",
+            "Save-as-routine orchestrated by a server action: fetches workout detail from workouts module, transforms to routine input, passes to routines module. Neither module imports the other.",
+            "Component tests for view toggle, exercise addition, and save-as-routine flow."
+          ],
+          "dependencies": ["TASK-014", "TASK-019"],
+          "completed": false
+        },
+        {
+          "id": "TASK-031",
+          "description": "Resume logic and session management. Stale session banner (2-4h) on History with Resume/Finish actions. Abandoned sessions (>4h) marked incomplete on app load.",
+          "effort": "M",
+          "stories": ["US-RS-2", "US-RS-3"],
+          "acceptance_criteria": [
+            "If active workout has 2-4h inactivity, History shows a banner: 'You have an unfinished workout. Resume?'",
+            "Banner Resume button navigates to Focus Mode for that workout.",
+            "Banner Finish button marks the workout as completed and saves as-is.",
+            "On app load, if localStorage indicates an active workout with >4h inactivity, update server status to 'incomplete' and clear localStorage.",
+            "Incomplete workouts opened from History feed enter Overview (Edit) mode, not Focus Mode.",
+            "Unit tests for time-threshold classification. Component tests for banner interactions."
+          ],
+          "dependencies": ["TASK-022"],
+          "completed": false
+        },
+        {
+          "id": "TASK-032",
+          "description": "Routine builder augmentation. Drag to reorder groups. Group exercises into supersets. Edit existing saved routines. Add/remove sets per exercise. Template notes on routines.",
+          "effort": "L",
+          "stories": ["US-RT-7", "US-RT-8", "US-RT-9", "US-RT-10", "US-RT-11"],
+          "acceptance_criteria": [
+            "Groups in the routine builder can be reordered via drag handles or mobile-friendly controls.",
+            "Two or more exercises can be grouped into a superset (single card with interleaved exercises).",
+            "Editing a saved routine loads its data into the builder for modification.",
+            "Sets can be added to or removed from any exercise in the builder.",
+            "Template note can be added to the routine and is visible on the detail view.",
+            "Routines module updated with reorderGroups, createSuperset, updateRoutine, addSet, removeSet, updateNote functions.",
+            "Integration tests for all new module functions. Component tests for drag reorder and superset UI.",
+            "If this task exceeds context limits, split into: (a) edit routine + add/remove sets + notes, (b) drag reorder, (c) supersets."
+          ],
+          "dependencies": ["TASK-015"],
+          "completed": false
+        },
+        {
+          "id": "TASK-033",
+          "description": "Custom exercise creation. Create custom exercise inline from exercise browser. Form with name, type, body parts, equipments. Custom exercises are stored as single-element arrays for body_parts and equipments fields.",
+          "effort": "M",
+          "stories": ["US-EX-7"],
+          "acceptance_criteria": [
+            "Exercise browser has 'Create Custom Exercise' action.",
+            "Custom exercise form collects: name, type (enum select), body part (single select, stored as single-element array), equipment (single select, stored as single-element array). Validates required fields.",
+            "Created exercise saved to user's account (userId set, externalId null) and appears in future searches.",
+            "modules/exercises/ exports createCustomExercise in index.ts.",
+            "Integration tests for custom exercise creation (validation, userId isolation). Tests include creating a distance_time exercise to verify all exercise types are supported.",
+            "Component tests for the creation form."
+          ],
+          "dependencies": ["TASK-014"],
+          "completed": false
+        },
+        {
+          "id": "TASK-034",
+          "description": "Notes system. Persistent exercise notes (Tier 2) in modules/exercises/: view and edit sticky notes per exercise. Session notes (Tier 3) via existing modules/workouts/ fields: workout-level and exercise-instance notes.",
+          "effort": "M",
+          "stories": ["US-NT-1", "US-NT-2", "US-NT-3", "US-NT-4"],
+          "acceptance_criteria": [
+            "modules/exercises/ exports getExerciseNote, upsertExerciseNote for persistent notes (Tier 2).",
+            "Persistent note visible on exercise cards in Focus Mode and routine detail views.",
+            "Tapping the note area allows editing; saved to ExerciseNote table (user_id + exercise_id unique).",
+            "Persistent note follows the exercise across all future workouts/routines.",
+            "Workout-level session note (Tier 3) editable in Focus Mode; saved via workouts module (Workout.note field, already in schema).",
+            "Exercise-instance session note (Tier 3) editable per exercise card; saved via workouts module (WorkoutExercise.note field, already in schema).",
+            "Session notes do not carry forward to future sessions.",
+            "Integration tests for persistent note CRUD. Component tests for note display and editing."
+          ],
+          "dependencies": ["TASK-010", "TASK-019"],
+          "completed": false
+        },
+        {
+          "id": "TASK-035",
+          "description": "Hero heatmap. Contribution-style grid on History page. Default shows daily total volume. Toggle to effort mode (average feedback). Adapts to viewport width.",
+          "effort": "L",
+          "stories": ["US-HI-4", "US-HI-5"],
+          "acceptance_criteria": [
+            "Heatmap grid renders at the top of the History page.",
+            "Default mode shows daily total volume with color intensity proportional to volume.",
+            "Toggle switches to Effort mode where color intensity reflects average qualitative feedback score.",
+            "Grid adapts column count to viewport width (fewer weeks on mobile, more on desktop).",
+            "modules/workouts/ exports getHeatmapData (daily aggregated volume and effort scores).",
+            "Legend provides context for color intensity.",
+            "Integration tests for data aggregation query. Component tests for rendering, toggle, and responsiveness."
+          ],
+          "dependencies": ["TASK-021"],
+          "completed": false
+        },
+        {
+          "id": "TASK-036",
+          "description": "History editing. Edit past workouts (modify set values, feedback, add/remove sets). Delete past workouts with confirmation.",
+          "effort": "M",
+          "stories": ["US-HI-6", "US-HI-7"],
+          "acceptance_criteria": [
+            "Tapping a past workout in the History feed opens an edit view.",
+            "Edit view allows modifying weight, reps, duration, distance, and feedback on any set.",
+            "Sets can be added to or removed from any exercise.",
+            "Saving recalculates total volume and persists all changes.",
+            "Delete Workout action with confirmation dialog removes the workout and all child records.",
+            "Server actions orchestrate edits and deletion via the workouts module.",
+            "Component tests for edit form interactions."
+          ],
+          "dependencies": ["TASK-021"],
+          "completed": false
+        },
+        {
+          "id": "TASK-037",
+          "description": "Augmentation E2E tests. Comprehensive E2E coverage for all M7 features.",
+          "effort": "L",
+          "stories": ["US-WK-10", "US-WK-11", "US-WK-14", "US-WK-15", "US-WK-16", "US-WK-17", "US-WK-18", "US-RS-2", "US-RS-3", "US-EX-7", "US-NT-1", "US-NT-2", "US-RT-7", "US-RT-9", "US-HI-4", "US-HI-6", "US-HI-7"],
+          "acceptance_criteria": [
+            "E2E test: complete a set -> rest timer appears -> +30s extends -> skip dismisses.",
+            "E2E test: progress indicator updates as cards are navigated.",
+            "E2E test: add a set during active workout -> new row appears. Remove a set -> row removed.",
+            "E2E test: discard workout -> confirm dialog -> redirected to History -> workout not in feed.",
+            "E2E test: toggle overview mode -> see all exercises in list -> toggle back to carousel.",
+            "E2E test: add exercise mid-workout via browser -> new card appears in carousel.",
+            "E2E test: finish ad-hoc workout -> 'Save as Routine' option -> save -> routine appears in /routines.",
+            "E2E test: stale session (2-4h) -> resume banner on History -> tap Resume -> Focus Mode.",
+            "E2E test: abandoned session (>4h) -> marked incomplete -> opens in edit mode from History.",
+            "E2E test: edit existing routine -> modify name -> save -> updated in list.",
+            "E2E test: reorder groups in routine builder -> order persists after save.",
+            "E2E test: create custom exercise inline -> appears in search results.",
+            "E2E test: add persistent exercise note -> note appears in next workout with same exercise.",
+            "E2E test: hero heatmap renders on History page with volume data.",
+            "E2E test: edit past workout -> modify a set value -> save -> updated in feed.",
+            "E2E test: delete past workout -> confirm -> removed from feed.",
+            "All E2E tests pass on mobile viewport."
+          ],
+          "dependencies": ["TASK-028", "TASK-029", "TASK-030", "TASK-031", "TASK-032", "TASK-033", "TASK-034", "TASK-035", "TASK-036"],
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": "M8",
+      "name": "Polish",
+      "description": "Settings, onboarding, theme, unit preferences. Final quality pass.",
+      "tasks": [
+        {
+          "id": "TASK-038",
+          "description": "Settings page. Unit preference (kg/lbs stored in UserPreferences via auth module). Theme toggle (light/dark, stored in localStorage). Change password. Delete account with confirmation. Geolocation-based unit default for new users.",
+          "effort": "M",
+          "stories": ["US-ST-1", "US-ST-2", "US-ST-3", "US-ST-4", "US-ST-5"],
+          "acceptance_criteria": [
+            "/settings page renders with sections for preferences and account management.",
+            "Unit preference toggle between kg and lbs. Read/written via getUserPreferences/updateUserPreferences from modules/auth/. Weight display conversion uses shared/units.ts utilities.",
+            "All weight displays across the app respect the preference.",
+            "Theme toggle between light and dark. Saved to localStorage. Theme updates immediately without page reload.",
+            "Change password form validates current and new password. Uses Better Auth's built-in password change.",
+            "Delete account with confirmation dialog. Removes user and all associated data permanently. Redirects to /login.",
+            "New user accounts default to kg, with geolocation inference via browser locale / Accept-Language header for US users (default to lbs).",
+            "Component tests for all settings interactions."
+          ],
+          "dependencies": ["TASK-005", "TASK-008"],
+          "completed": false
+        },
+        {
+          "id": "TASK-039",
+          "description": "Onboarding overlay. Non-blocking intro overlay on first workout explaining carousel navigation. Uses UserPreferences.onboarding_completed flag via auth module. Shown once.",
+          "effort": "S",
+          "stories": ["US-OB-1"],
+          "acceptance_criteria": [
+            "On first workout start, if onboarding_completed is false (read via getUserPreferences), a non-blocking overlay appears explaining carousel navigation (swipe, buttons, feedback).",
+            "Overlay is dismissible.",
+            "On dismiss, onboarding_completed set to true via updateUserPreferences.",
+            "Overlay does not appear on subsequent workout starts.",
+            "Component test verifies overlay display and dismissal. Integration test verifies flag persistence."
+          ],
+          "dependencies": ["TASK-019", "TASK-005"],
+          "completed": false
+        },
+        {
+          "id": "TASK-040",
+          "description": "Polish E2E tests. Settings and onboarding flows.",
+          "effort": "S",
+          "stories": ["US-ST-1", "US-ST-4", "US-ST-5", "US-OB-1"],
+          "acceptance_criteria": [
+            "E2E test: change unit preference to lbs -> complete a workout -> weight values display in lbs in History feed.",
+            "E2E test: toggle theme to dark -> reload -> theme persists.",
+            "E2E test: delete account -> confirm -> redirected to /login -> cannot sign in with old credentials.",
+            "E2E test: first workout -> onboarding overlay appears -> dismiss -> second workout -> overlay does not appear.",
+            "All E2E tests pass on mobile viewport."
+          ],
+          "dependencies": ["TASK-038", "TASK-039"],
+          "completed": false
+        }
+      ]
+    }
+  ]
+}

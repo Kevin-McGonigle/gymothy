@@ -10,6 +10,25 @@
   1. Feedback prompt per exercise within the card.
   2. Single prompt for the whole card, value applied to each exercise's last set.
 
+### Compound vs. Isolation Exercise Classification
+
+- **Status:** Unresolved — revisit during progression engine implementation.
+- **Context:** The progression engine (Decision 14) constrains rep ranges: compound 6-10, isolation 8-12. But the exercise `type` enum (`weight_reps`, `bodyweight_reps`, etc.) classifies by input mode, not movement pattern. The engine has no data source for compound vs. isolation.
+- **Options:**
+  1. Add a `movement_category` (compound/isolation) field to the Exercise table.
+  2. Accept compound/isolation as a parameter to `calculateProgression`, letting the caller decide.
+  3. Defer the constraint entirely — apply a single rep range for all exercises.
+
+### Active Workout Client-Server Sync Strategy
+
+- **Status:** Unresolved — resolve during TASK-018/019 implementation.
+- **Context:** Active workouts have dual state: Zustand store (client, localStorage) and database (server). Need to define when and how they sync.
+- **Options:**
+  1. Optimistic local mutations, sync to server on each set completion (frequent, resilient).
+  2. Optimistic local mutations, batch sync periodically (less traffic, more data-loss risk).
+  3. Optimistic local mutations, sync only on finish (simplest, highest data-loss risk).
+- **Constraints:** localStorage prevents tab-sleep data loss (Decision 5). Server persistence prevents cross-device/clear-cache data loss. Both are needed.
+
 ---
 
 ## 1. Authentication
