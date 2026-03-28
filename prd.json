@@ -49,7 +49,7 @@
             "pnpm drizzle-kit push succeeds against local SQLite."
           ],
           "dependencies": ["TASK-001"],
-          "completed": false
+          "completed": true
         },
         {
           "id": "TASK-003",
@@ -699,7 +699,7 @@
           "acceptance_criteria": [
             "Exercise browser has 'Create Custom Exercise' action.",
             "Custom exercise form collects: name, type (enum select), body part (single select, stored as single-element array), equipment (single select, stored as single-element array). Validates required fields.",
-            "Created exercise saved to user's account (userId set, externalId null) and appears in future searches.",
+            "Created exercise saved to user's account (userId set, externalId null) and appears in future searches. Duplicate names are allowed (per Decision 23) — users may have exercises with the same name but different configurations.",
             "modules/exercises/ exports createCustomExercise in index.ts.",
             "Integration tests for custom exercise creation (validation, userId isolation). Tests include creating a distance_time exercise to verify all exercise types are supported.",
             "Component tests for the creation form."

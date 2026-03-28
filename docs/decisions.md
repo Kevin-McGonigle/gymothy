@@ -159,3 +159,18 @@
 
 - **Decision:** Centralize all Drizzle schema definitions in `lib/db/schema.ts` as a single barrel file. `drizzle.config.ts` points to this file.
 - **Rationale:** Drizzle-kit requires a schema entry point for migrations. A single barrel file (`lib/db/schema.ts` that re-exports from modules if needed) keeps drizzle-kit configuration simple and avoids glob fragility. Schema types are internal to the infrastructure layer — modules export opaque DTOs, not table types. Per the architecture doc, `lib/` is the infrastructure layer and the DB schema is infrastructure.
+
+## 21. Migration Workflow
+
+- **Decision:** Use `drizzle-kit push` for local development. Use `drizzle-kit generate` + `drizzle-kit migrate` for production deployments. Migration files are committed to version control.
+- **Rationale:** `push` is fast for local iteration (applies schema directly). `generate` + `migrate` produces migration SQL files that can be reviewed, versioned, and applied in CI/CD. Both coexist — `push` for dev, `migrate` for prod.
+
+## 22. Auth Schema Management
+
+- **Decision:** Better Auth tables are CLI-generated in `lib/db/auth-schema.ts` via `pnpm dlx auth@latest generate`. Only table definitions are imported from this file. Relations for all tables (including auth tables) are defined in `lib/db/schema.ts`.
+- **Rationale:** The CLI generates its own relation definitions, but we need to extend `userRelations` with domain entities. Defining all relations in `schema.ts` avoids duplicate `relations()` calls on the same table. After regenerating auth-schema.ts, no edits are needed — the generated relations are simply not imported.
+
+## 23. Custom Exercise Deduplication
+
+- **Decision:** Allow duplicate custom exercise names per user. No uniqueness constraint on `(user_id, name)`.
+- **Rationale:** Users may legitimately create exercises with the same name but different equipment or body part configurations (e.g., "Cable Row" with different equipment). The UI can warn but should not block creation.

@@ -7,12 +7,13 @@ if (!url) {
   throw new Error("TURSO_DATABASE_URL is not set");
 }
 
+const isTurso = url.startsWith("libsql://");
+
 export default defineConfig({
   schema: "./lib/db/schema.ts",
   out: "./drizzle",
-  dialect: "turso",
-  dbCredentials: {
-    url,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-  },
+  dialect: isTurso ? "turso" : "sqlite",
+  dbCredentials: isTurso
+    ? { url, authToken: process.env.TURSO_AUTH_TOKEN }
+    : { url },
 });
