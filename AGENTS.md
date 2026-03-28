@@ -1,10 +1,14 @@
-- **Development:** When working on a task, particularly when writing code will be involved, invoke the `tdd` skill using the Skill tool.
-- **Ambiguity:** _Never_ write code based on unverified assumptions. If unclear, ask for clarification. _Never_ proceed without a clear, comprehensive understanding what's expected.
-- **Testing:** Unit test logic (e.g., progression); Component test complex UI (e.g., Carousel).
-- **Network Mocking:** MSW required for all external API/DB calls. NO real network requests.
-- **Client State:** Zustand for complex interactive sessions (Active Workout, Routine Builder).
-- **Mutations:** Server Actions for data mutations where possible.
-- **Styling:** Utility classes only. Avoid arbitrary values.
-- **Scripts:** Use pnpm for all scripts and commands.
-- **Tools:** Prefer built-in tool use over custom shell commands.
-- **Loops:** Avoid for/while loops. Use functional array methods where possible.
+- **Development:** Invoke `tdd` skill for all code changes.
+- **Ambiguity:** _Never_ write code based on unverified assumptions. If unclear, ask for clarification. _Never_ proceed without clear, comprehensive understanding of what's expected.
+- **Architecture:** Deep Modules — domain logic in `modules/`, single `index.ts` entry per module. See `docs/architecture.md`.
+- **Testing:** Unit tests within modules for fast feedback. Comprehensive integration tests on all module public interfaces, covering all edge cases. Component tests for all UI. E2E with Playwright.
+- **Mocking:** MSW at system boundaries only. Never mock DB — real in-memory schema.
+- **Client State:** Zustand for complex sessions needing local persistence + real-time reactivity.
+- **Mutations:** Prefer Server Actions over API routes. Actions = thin orchestrators: validate session, call module, revalidate/redirect. No business logic.
+- **Styling:** Utility classes only. No arbitrary values.
+- **Scripts:** pnpm for everything.
+- **Tools:** Prefer built-in tool use over shell commands.
+- **Loops:** Functional array methods over for/while.
+- **Knowledge Gaps:** Never guess at external APIs or unfamiliar library patterns. Consult skill references and local documentation first, web fetch authoritative docs second, ask the user third.
+- **Decisions:** `docs/decisions.md` is a running log — liberally append non-trivial technical/design choices.
+- **Docs:** `docs/brief.md`, `docs/architecture.md`, `docs/data-model.md`, `docs/decisions.md`, `docs/ux-flows.md`, `docs/user-stories.md`.

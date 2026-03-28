@@ -5,7 +5,9 @@ description: Standardized pattern for writing database-driven integration tests.
 
 # Drizzle Test Authoring Pattern
 
-Use this skill when writing or refactoring tests for Server Actions, API routes, or DB utility functions. This assumes the Vitest in-memory SQLite environment is already configured.
+Use this skill when writing or refactoring tests for module public interfaces, Server Actions, or DB utility functions. This assumes the Vitest in-memory SQLite environment is already configured.
+
+**Architecture alignment:** Tests should import from the module's public API (`modules/X/index.ts`), never from internal files. See [`docs/architecture.md`](../../docs/architecture.md).
 
 ## Execution Rules
 
@@ -49,7 +51,7 @@ it("should [expected behavior] when [condition]", async () => {
 
 - **No Manual Cleanup**: Do not manually delete rows at the end of a test; the global `beforeEach` hook handles this.
 - **Unique Identifiers**: Use `faker` or unique strings for names/IDs to avoid accidental collisions if multiple records are seeded in one test.
-- **Type Safety**: Use `typeof schema.table.$inferSelect` or `$inferInsert` when asserting against database objects.
+- **Type Safety**: When testing a module's public API, assert against exported DTO types. Within a module's own internal tests, `typeof schema.table.$inferSelect` or `$inferInsert` is acceptable.
 
 ## Contextual Checklist
 

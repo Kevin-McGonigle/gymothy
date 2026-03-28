@@ -1,25 +1,18 @@
 ---
 name: base-ui
-description: A reference for using Base UI primitives to build accessible, flexible, and production-grade frontend interfaces. Use this skill when you want to implement or review UI components.
+description: Reference for using @base-ui/react primitives. Use when implementing or reviewing UI components.
 ---
 
-# Base UI Guidelines
+# Base UI
 
-Implement or review UI components using Base UI.
+Local references in `references/` (relative to this skill):
 
-## How It Works
+- `composition.md` — composing Base UI components with custom components, render props
+- `use-render.md` — `useRender` hook for polymorphism in custom components
+- `styling.md` — styling patterns (Tailwind CSS v4)
+- `customization.md` — customizing component behavior
+- `typescript.md` — TypeScript patterns and type inference
 
-1. Fetch the latest documentation from the source URL below
-2. Read the specified files (or prompt user for files/pattern)
-3. Navigate the documentation to find relevant information for the UI component(s) in question
-4. If implementing, follow the documentation to build the UI components. If reviewing, check the components against the documentation and output any issues or improvements in the terse `file:line` format.
+**Read the relevant reference files before writing Base UI code.** Do not guess at APIs.
 
-## Documentation Source
-
-Use WebFetch to retrieve the latest documentation:
-
-```
-https://base-ui.com/llms.txt
-```
-
-The fetched content contains all the base UI documentation - try to find only the relevant sections for the component(s) in question. Always read the handbook sections for holistic best practices. Avoid reading unnecessary documentation, such as release notes.
+For components not covered locally, the full component index is at `https://base-ui.com/llms.txt` — fetch the specific component `.md` URL from there.

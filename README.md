@@ -1,23 +1,22 @@
 # Gymothy
 
-**Gymothy** is a mobile-first, friction-free workout tracker designed for focus and flow. It replaces complex spreadsheets and bloated apps with a streamlined "Focus Mode" that puts your active set right under your thumb.
+**Gymothy** is a mobile-first progressive web app for tracking strength and cardio progress. It replaces complex spreadsheets and bloated apps with a streamlined "Focus Mode" that puts your active set right under your thumb.
 
 ## Core Value Proposition
 
 - **Focus Mode:** A horizontal card-based interface that shows you only what you need to do right now.
 - **Smart Progression:** A deterministic engine that suggests weight/rep adjustments based on qualitative feedback ("Too Easy", "Solid", "Struggle", "Failure") to keep you in the hypertrophy zone.
-- **Data Integrity:** A unified exercise database that "shadows" global data locally, ensuring your history is never lost.
+- **Data Integrity:** ExerciseDB indexed locally, ensuring your history is never lost regardless of API availability.
 - **Privacy First:** No social features, no data caps, no cloud dependency for core tracking.
 
 ## Tech Stack
 
-- **Framework:** [Next.js](https://nextjs.org/)
+- **Framework:** [Next.js](https://nextjs.org/) (App Router)
 - **Language:** [TypeScript](https://www.typescriptlang.org/)
-- **Database:** [Turso](https://turso.tech/)
-- **ORM:** [Drizzle ORM](https://orm.drizzle.team/)
+- **UI:** [Base UI](https://base-ui.com/) + [Tailwind CSS](https://tailwindcss.com/)
+- **Database:** [Turso](https://turso.tech/) via [Drizzle ORM](https://orm.drizzle.team/)
 - **Auth:** [Better Auth](https://better-auth.com/)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-- **Testing:** [Vitest](https://vitest.dev/)
+- **Testing:** [Vitest](https://vitest.dev/) + [Playwright](https://playwright.dev/)
 
 ## Getting Started
 
@@ -26,53 +25,47 @@
 - Node.js 24+
 - pnpm
 
-### Installation
+### Setup
 
-1.  **Clone the repository:**
+1. Install dependencies:
 
-    ```bash
-    git clone https://github.com/your-username/gymothy.git
-    cd gymothy
-    ```
+   ```bash
+   pnpm install
+   ```
 
-2.  **Install dependencies:**
+2. Copy the example environment file and fill in your Turso credentials and Better Auth secrets:
 
-    ```bash
-    pnpm install
-    ```
+   ```bash
+   cp .env.example .env.local
+   ```
 
-3.  **Environment Setup:**
-    Copy the example environment file:
+3. Push the schema to your local SQLite or remote Turso instance:
 
-    ```bash
-    cp .env.example .env.local
-    ```
+   ```bash
+   pnpm drizzle-kit push
+   ```
 
-    Fill in your Turso database credentials and Better Auth secrets.
+4. Run the development server:
 
-4.  **Database Migration:**
-    Push the schema to your local SQLite or remote Turso instance:
-
-    ```bash
-    pnpm drizzle-kit push
-    ```
-
-5.  **Run Development Server:**
-    ```bash
-    pnpm dev
-    ```
-    Open [http://localhost:3000](http://localhost:3000) to see the app.
+   ```bash
+   pnpm dev
+   ```
 
 ## Testing
 
-### Unit and Component Tests (Vitest)
-
 ```bash
-pnpm test
+pnpm test        # Unit and integration tests (Vitest)
+pnpm test:e2e    # End-to-end tests (Playwright)
+pnpm lint        # Lint and format check (Biome)
 ```
 
-### End-to-End Tests (Playwright)
+## Docs
 
-```bash
-pnpm test:e2e
-```
+| Doc | Purpose |
+| :-- | :-- |
+| [`docs/brief.md`](docs/brief.md) | Product overview and value proposition |
+| [`docs/architecture.md`](docs/architecture.md) | Deep Module architecture and project layering |
+| [`docs/data-model.md`](docs/data-model.md) | Database schema, ERD, entity relationships |
+| [`docs/decisions.md`](docs/decisions.md) | Decision log with rationale |
+| [`docs/ux-flows.md`](docs/ux-flows.md) | Navigation, routes, interaction flows |
+| [`docs/user-stories.md`](docs/user-stories.md) | Given/When/Then stories by feature |
