@@ -1,0 +1,10 @@
+- **Development:** When working on a task, particularly when writing code will be involved, invoke the `tdd` skill using the Skill tool.
+- **Ambiguity:** _Never_ write code based on unverified assumptions. If unclear, ask for clarification. _Never_ proceed without a clear, comprehensive understanding what's expected.
+- **Testing:** Unit test logic (e.g., progression); Component test complex UI (e.g., Carousel).
+- **Network Mocking:** MSW required for all external API/DB calls. NO real network requests.
+- **Client State:** Zustand for complex interactive sessions (Active Workout, Routine Builder).
+- **Mutations:** Server Actions for data mutations where possible.
+- **Styling:** Utility classes only. Avoid arbitrary values.
+- **Scripts:** Use pnpm for all scripts and commands.
+- **Tools:** Prefer built-in tool use over custom shell commands.
+- **Loops:** Avoid for/while loops. Use functional array methods where possible.
