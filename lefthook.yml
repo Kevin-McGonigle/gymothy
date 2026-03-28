@@ -8,3 +8,5 @@ pre-push:
   commands:
     check:
       run: pnpm lint --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {push_files}
+    typecheck:
+      run: pnpm tsc --noEmit
