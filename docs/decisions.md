@@ -149,3 +149,13 @@
 
 - **Decision:** Use Vitest's `vi.mock` to globally intercept the `@/lib/db` module and inject the in-memory `testDb` instance.
 - **Rationale:** Prioritizes implementation simplicity and keeps production code clean of dependency injection "plumbing," which is acceptable given the project's current scale and complexity.
+
+## 19. tsconfig.json JSX Setting
+
+- **Decision:** Accept Next.js overriding `jsx` to `"react-jsx"` in `tsconfig.json`. Do not attempt to set `"preserve"`.
+- **Rationale:** Next.js 16 enforces `jsx: "react-jsx"` on every build, overwriting any manual changes. It handles JSX transformation via SWC/Turbopack regardless. Fighting this wastes effort.
+
+## 20. Schema Location Strategy
+
+- **Decision:** Centralize all Drizzle schema definitions in `lib/db/schema.ts` as a single barrel file. `drizzle.config.ts` points to this file.
+- **Rationale:** Drizzle-kit requires a schema entry point for migrations. A single barrel file (`lib/db/schema.ts` that re-exports from modules if needed) keeps drizzle-kit configuration simple and avoids glob fragility. Schema types are internal to the infrastructure layer — modules export opaque DTOs, not table types. Per the architecture doc, `lib/` is the infrastructure layer and the DB schema is infrastructure.

@@ -12,7 +12,15 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!node_modules", "!.next", "!dist", "!build"]
+    "includes": [
+      "**",
+      "!node_modules",
+      "!.next",
+      "!dist",
+      "!build",
+      "!.agents",
+      "!.claude"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -25,6 +33,19 @@
       "recommended": true,
       "suspicious": {
         "noUnknownAtRules": "off"
+      },
+      "style": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "patterns": [
+              {
+                "group": ["@/modules/*/**"],
+                "message": "Import from the module's public API (e.g., @/modules/exercises), not its internals."
+              }
+            ]
+          }
+        }
       }
     },
     "domains": {

@@ -25,13 +25,14 @@
             "pnpm build passes."
           ],
           "dependencies": [],
-          "completed": false
+          "completed": true
         },
         {
           "id": "TASK-002",
-          "description": "Database schema. Rebuild lib/db/schema.ts from docs/data-model.md using archive as starting point. Apply all conformance fixes. Generate and push migrations.",
+          "description": "Database schema. Rebuild lib/db/schema.ts from docs/data-model.md using archive as starting point. Apply all conformance fixes. Generate and push migrations. Schema lives in lib/db/schema.ts as a single barrel file per Decision 20.",
           "effort": "M",
           "acceptance_criteria": [
+            "All schema definitions live in lib/db/schema.ts (single barrel file, per docs/decisions.md #20). drizzle.config.ts already points here.",
             "Schema matches docs/data-model.md exactly.",
             "exercises table: imageUrl (not gifUrl), instructions field, indexes on unique external_id, user_id, and name.",
             "workouts.status enum: 'active', 'completed', 'incomplete', 'discarded'.",
@@ -56,7 +57,7 @@
           "effort": "L",
           "acceptance_criteria": [
             "vitest.config.ts scopes jsdom environment to component tests only (module tests use Node).",
-            "playwright.config.ts has mobile viewports enabled.",
+            "playwright.config.ts exists with mobile viewports enabled. E2E tests live in tests/e2e/ using *.spec.ts convention. Vitest excludes *.spec.ts files (already configured).",
             "tests/setup.ts configures MSW with onUnhandledRequest: 'error'.",
             "tests/setup-db.ts configures in-memory LibSQL with migration and per-test cleanup.",
             "Factories in tests/factories/ for: user, exercise, routine, routineGroup, routineExercise, routineSet, workout, workoutExerciseGroup, workoutExercise, workoutSet, userPreferences. All follow build/create pattern.",
@@ -148,7 +149,13 @@
           "id": "TASK-008",
           "description": "Navigation shell and empty states. Bottom nav bar with History and Routines tabs plus elevated Start Workout action. Burger menu with Settings and Sign Out. Tab bar hidden during Focus Mode (CSS mechanism only). Stub pages for /, /routines, /settings with empty states.",
           "effort": "L",
-          "stories": ["US-NAV-1", "US-NAV-2", "US-NAV-3", "US-NAV-4", "US-AUTH-3"],
+          "stories": [
+            "US-NAV-1",
+            "US-NAV-2",
+            "US-NAV-3",
+            "US-NAV-4",
+            "US-AUTH-3"
+          ],
           "acceptance_criteria": [
             "Authenticated layout includes a bottom navigation bar.",
             "Nav bar has History tab, Routines tab, and a visually elevated Start Workout action.",
@@ -170,7 +177,16 @@
           "id": "TASK-009",
           "description": "E2E smoke tests. Playwright tests for auth flows and navigation. Establish auth test setup project with storageState for future E2E tests.",
           "effort": "M",
-          "stories": ["US-AUTH-1", "US-AUTH-2", "US-AUTH-3", "US-AUTH-4", "US-AUTH-5", "US-NAV-1", "US-NAV-2", "US-NAV-3"],
+          "stories": [
+            "US-AUTH-1",
+            "US-AUTH-2",
+            "US-AUTH-3",
+            "US-AUTH-4",
+            "US-AUTH-5",
+            "US-NAV-1",
+            "US-NAV-2",
+            "US-NAV-3"
+          ],
           "acceptance_criteria": [
             "Playwright auth setup project creates a test user and saves storageState.",
             "E2E test: sign up with new email -> lands on History empty state.",
@@ -252,7 +268,14 @@
           "id": "TASK-013",
           "description": "Routines module. Create modules/routines/ with public API. CRUD: create routine (name, userId), list routines by user, get routine by ID (full hierarchy: groups -> exercises -> sets), delete routine (cascade), add exercise to routine (creates group + exercise + default set), update set targets. DTOs and domain errors. Integration tests.",
           "effort": "L",
-          "stories": ["US-RT-1", "US-RT-2", "US-RT-3", "US-RT-4", "US-RT-5", "US-RT-6"],
+          "stories": [
+            "US-RT-1",
+            "US-RT-2",
+            "US-RT-3",
+            "US-RT-4",
+            "US-RT-5",
+            "US-RT-6"
+          ],
           "acceptance_criteria": [
             "modules/routines/index.ts exports createRoutine, getRoutines, getRoutineById, deleteRoutine, addExerciseToRoutine, updateSetTargets.",
             "createRoutine accepts name and userId, returns RoutineDTO.",
@@ -290,7 +313,14 @@
           "id": "TASK-015",
           "description": "Routine pages and server actions. /routines list page (real data, replaces stub). /routines/new builder page with exercise browser integration. /routines/[id] detail view. Server actions as thin orchestrators for create, add exercise, set targets, delete.",
           "effort": "L",
-          "stories": ["US-RT-1", "US-RT-2", "US-RT-3", "US-RT-4", "US-RT-5", "US-RT-6"],
+          "stories": [
+            "US-RT-1",
+            "US-RT-2",
+            "US-RT-3",
+            "US-RT-4",
+            "US-RT-5",
+            "US-RT-6"
+          ],
           "acceptance_criteria": [
             "/routines shows user's routines list (name, exercise count). Empty state if none.",
             "/routines/new renders routine builder: name input, 'Add Exercise' button opens exercise browser, set target inputs per exercise.",
@@ -309,7 +339,19 @@
           "id": "TASK-016",
           "description": "Routines E2E tests. Full user flows: create routine with exercises and targets, view detail, delete. Exercise search and filter within the builder.",
           "effort": "M",
-          "stories": ["US-RT-1", "US-RT-2", "US-RT-3", "US-RT-4", "US-RT-5", "US-RT-6", "US-EX-2", "US-EX-3", "US-EX-4", "US-EX-5", "US-EX-6"],
+          "stories": [
+            "US-RT-1",
+            "US-RT-2",
+            "US-RT-3",
+            "US-RT-4",
+            "US-RT-5",
+            "US-RT-6",
+            "US-EX-2",
+            "US-EX-3",
+            "US-EX-4",
+            "US-EX-5",
+            "US-EX-6"
+          ],
           "acceptance_criteria": [
             "E2E test: navigate to /routines -> see empty state CTA.",
             "E2E test: create routine -> name it -> add exercise via browser -> set targets -> save -> see detail.",
@@ -377,7 +419,16 @@
           "id": "TASK-019",
           "description": "Focus Mode UI. /workout/new start screen (routine list + Start Empty Workout). /workout/[id] Focus Mode: horizontal carousel, set logging, finish. Server actions for start and finish.",
           "effort": "L",
-          "stories": ["US-WK-1", "US-WK-2", "US-WK-3", "US-WK-4", "US-WK-5", "US-WK-6", "US-WK-7", "US-WK-8"],
+          "stories": [
+            "US-WK-1",
+            "US-WK-2",
+            "US-WK-3",
+            "US-WK-4",
+            "US-WK-5",
+            "US-WK-6",
+            "US-WK-7",
+            "US-WK-8"
+          ],
           "acceptance_criteria": [
             "/workout/new shows list of user's routines + 'Start Empty Workout' option.",
             "Selecting a routine creates a workout and redirects to /workout/[id].",
@@ -400,7 +451,17 @@
           "id": "TASK-020",
           "description": "Active workout E2E tests. Full user flows: start from routine, navigate carousel, log a set, complete it, finish workout. Start empty workout. Session persistence across page reload.",
           "effort": "M",
-          "stories": ["US-WK-1", "US-WK-2", "US-WK-3", "US-WK-4", "US-WK-5", "US-WK-6", "US-WK-7", "US-WK-8", "US-WK-9"],
+          "stories": [
+            "US-WK-1",
+            "US-WK-2",
+            "US-WK-3",
+            "US-WK-4",
+            "US-WK-5",
+            "US-WK-6",
+            "US-WK-7",
+            "US-WK-8",
+            "US-WK-9"
+          ],
           "acceptance_criteria": [
             "E2E test: start workout from routine -> see first exercise card in carousel.",
             "E2E test: navigate to next card via button -> card changes.",
@@ -702,7 +763,25 @@
           "id": "TASK-037",
           "description": "Augmentation E2E tests. Comprehensive E2E coverage for all M7 features.",
           "effort": "L",
-          "stories": ["US-WK-10", "US-WK-11", "US-WK-14", "US-WK-15", "US-WK-16", "US-WK-17", "US-WK-18", "US-RS-2", "US-RS-3", "US-EX-7", "US-NT-1", "US-NT-2", "US-RT-7", "US-RT-9", "US-HI-4", "US-HI-6", "US-HI-7"],
+          "stories": [
+            "US-WK-10",
+            "US-WK-11",
+            "US-WK-14",
+            "US-WK-15",
+            "US-WK-16",
+            "US-WK-17",
+            "US-WK-18",
+            "US-RS-2",
+            "US-RS-3",
+            "US-EX-7",
+            "US-NT-1",
+            "US-NT-2",
+            "US-RT-7",
+            "US-RT-9",
+            "US-HI-4",
+            "US-HI-6",
+            "US-HI-7"
+          ],
           "acceptance_criteria": [
             "E2E test: complete a set -> rest timer appears -> +30s extends -> skip dismisses.",
             "E2E test: progress indicator updates as cards are navigated.",
@@ -722,7 +801,17 @@
             "E2E test: delete past workout -> confirm -> removed from feed.",
             "All E2E tests pass on mobile viewport."
           ],
-          "dependencies": ["TASK-028", "TASK-029", "TASK-030", "TASK-031", "TASK-032", "TASK-033", "TASK-034", "TASK-035", "TASK-036"],
+          "dependencies": [
+            "TASK-028",
+            "TASK-029",
+            "TASK-030",
+            "TASK-031",
+            "TASK-032",
+            "TASK-033",
+            "TASK-034",
+            "TASK-035",
+            "TASK-036"
+          ],
           "completed": false
         }
       ]
