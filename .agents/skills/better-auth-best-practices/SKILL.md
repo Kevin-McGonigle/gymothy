@@ -5,7 +5,24 @@ description: Configure Better Auth server and client, set up database adapters, 
 
 # Better Auth Integration Guide
 
-**Always consult [better-auth.com/docs](https://better-auth.com/docs) for code examples and latest API.**
+**Never modify Better Auth's managed tables** (users, sessions, accounts, verifications) directly. Use `databaseHooks` or `additionalFields` in the config to extend. Run `pnpx @better-auth/cli@latest generate` after config changes.
+
+## Local References
+
+Authoritative docs in `references/` (relative to this skill). **Read before writing auth code — do not guess at APIs.**
+
+- `integrations-next.md` — Next.js route handler, middleware, SSR session access
+- `adapters-drizzle.md` — Drizzle ORM adapter setup
+- `adapters-sqlite.md` — SQLite/LibSQL specifics
+- `authentication-email-password.md` — email/password auth flow
+- `concepts-database.md` — core schema, migrations, extending tables, database hooks
+- `concepts-session-management.md` — session expiration, caching, storage strategies
+- `concepts-client.md` — client setup, `useSession`, React hooks
+- `basic-usage.md` — getting started patterns
+- `concepts-typescript.md` — type inference for sessions and users
+- `plugins-test-utils.md` — testing utilities for integration and E2E tests
+
+For topics not covered locally, fetch the specific page URL from `https://better-auth.com/llms.txt`.
 
 ---
 

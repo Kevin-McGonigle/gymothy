@@ -1,5 +1,17 @@
 # Decision Log
 
+## Pending
+
+### Feedback Granularity in Supersets
+
+- **Status:** Unresolved — revisit during workout feature implementation.
+- **Context:** The UX triggers feedback on "the last set of an exercise" and saves it to that set. For single-exercise cards this is unambiguous. For superset cards (multiple exercises), the progression engine needs per-exercise feedback.
+- **Options:**
+  1. Feedback prompt per exercise within the card.
+  2. Single prompt for the whole card, value applied to each exercise's last set.
+
+---
+
 ## 1. Authentication
 
 - **Decision:** Use **Better Auth** with Email/Password provider only for MVP.
@@ -12,10 +24,9 @@
 
 ## 2. Exercise Database
 
-- **Decision:** Hybrid approach.
-  - **Global Exercises:** Fetched from `exercisedb.dev` API (real-time initially, caching if needed).
-  - **Custom Exercises:** Stored locally in our database.
-- **Rationale:** Leverages an existing high-quality dataset without bloating our DB, while still allowing user flexibility.
+- **Decision:** Index ExerciseDB data into the local database. All search and filtering operates against a single local source.
+- **Rationale:** ExerciseDB is a relatively static dataset. Dual-source search (API + local DB merged client-side) introduced needless complexity in the first iteration. A local index with periodic syncs simplifies the data model, eliminates runtime API dependency for reads, and makes search a straightforward DB query. The ExerciseDB service becomes an import/sync tool, not a runtime dependency.
+- **Supersedes:** Previous "Hybrid approach" where global exercises were fetched from the API at runtime and custom exercises stored locally.
 
 ## 3. Progression Engine (MVP)
 
@@ -34,10 +45,11 @@
 - **Constraint:** No 1RM (One Rep Max) estimations.
 - **Rationale:** Target audience is general fitness enthusiasts, not powerlifting competitors. Volume is a more reliable metric of work capacity.
 
-## 5. Local Persistence
+## 5. Local Persistence & PWA
 
-- **Decision:** Mirror **Active Session** state to `localStorage`.
-- **Rationale:** strictly to prevent data loss on mobile browser tab sleep/discard. Not a full offline-first sync architecture.
+- **Decision:** Mirror **Active Session** state to `localStorage` for data loss prevention. Ship as a **Progressive Web App** (installable, offline-capable shell) from the start.
+- **Rationale:** localStorage prevents data loss from mobile browser tab-sleeping. PWA ensures the app is installable on-device without an app store. Initial PWA scope is minimal — service worker for shell caching and a web manifest for installability. No device API integrations initially; the door is left open for future enhancements.
+- **Supersedes:** Previous decision scoped only to localStorage with no PWA consideration.
 
 ## 6. Data Modeling: Supersets & Grouping
 
@@ -51,17 +63,23 @@
   - **Logic:** A Group acts as a "Card" in the UI.
     - If Group contains 1 Exercise = Standard Set.
     - If Group contains >1 Exercise = Superset.
-  - **Rationale:** Provides a stable parent container for reordering. clearly distinguishes "joining a superset" vs "placing between exercises" in the UI.
+  - **Rationale:** Provides a stable parent container for reordering. Clearly distinguishes "joining a superset" vs "placing between exercises" in the UI.
 
 ## 7. Unified Exercise Model
 
-- **Decision:** Use a single `Exercise` table as a "Shadow" for ExerciseDB and a storage for Custom Exercises.
-- **Rationale:** Simplifies foreign key relationships by ensuring all workout/routine records point to a single local UUID. Shadowing metadata (name, muscles) ensures history remains readable even if the API is unavailable.
+- **Decision:** Use a single `Exercise` table for both ExerciseDB-sourced and user-created exercises.
+- **Rationale:** With local indexing (Decision 2), all exercises — whether originally from ExerciseDB or user-created — live in the same table. ExerciseDB exercises are distinguished by a non-null `external_id`. This simplifies foreign key relationships and ensures all workout/routine records point to a single local UUID. History remains readable regardless of API availability.
+- **Supersedes:** Previous "Shadow" model where exercises were copied into the local DB on-demand when added to a routine or workout. Now the full dataset is indexed upfront.
 
 ## 8. Qualitative Feedback System
 
 - **Decision:** Use a four-point qualitative scale (`too_easy`, `solid`, `struggle`, `failure`) instead of technical metrics like RPE (Rate of Perceived Exertion) or RIR (Reps in Reserve).
 - **Rationale:** Lowers the barrier to entry for beginners and makes the app feel more human. Complex progressive overload math is handled by the app based on the user's "feeling."
+
+## 9. Architecture: Deep Modules
+
+- **Decision:** Adopt a Deep Module architecture. See [`docs/architecture.md`](architecture.md) for the full specification.
+- **Rationale:** The first development iteration drifted toward tightly-coupled, shallow modules with weak public interfaces. Deep Modules enforce encapsulation, clear boundaries, and a testable public API. Feature-based organization (`modules/`) with a single `index.ts` entry point per module, opaque DTOs, and a strict DAG dependency graph.
 
 ## 10. Focus Mode (Carousel) UI
 
@@ -98,54 +116,17 @@
 - **Decision:** Just-in-Time overlays and helpful empty states. No upfront wizard.
 - **Rationale:** Reduces friction to value. Users learn by doing, not by reading.
 
-## 16. Task-006 ExerciseDB Service Foundation
-
-- **Decision:** Implement a plain TypeScript service module (`lib/exercises/service.ts`) for ExerciseDB data fetching, with hook wrappers deferred to later tasks (TASK-007/TASK-008).
-- **Rationale:** Service is directly testable and decoupled from React; aligns with product intent for core data access library.
-
-- **Decision:** Cover essential endpoints required to unblock UI card rendering:
-  - `GET /api/v1/exercises` (list with pagination/search)
-  - `GET /api/v1/exercises/{exerciseId}` (single exercise details)
-  - `GET /api/v1/exercises/search` (fuzzy search)
-  - Optional advanced filtering endpoints deferred until needed.
-- **Rationale:** Keep scope minimal but sufficient for Exercise Card data (name, muscles, bodyPart, equipment, gifUrl), with room to add complexity when UX demands.
-
-- **Decision:** Use `zod` for response schema validation to protect against ExerciseDB contract drift.
-- **Rationale:** Provides safety for external API responses and early failure paths.
-
-- **Decision:** Enforce HTTP request timeout of 10 seconds.
-- **Rationale:** Protects UX from hanging requests while allowing enough time for remote API latency.
-
-- **Decision:** Hardcode ExerciseDB base URL (`https://exercisedb.dev/api/v1`) in the service module.
-- **Rationale:** No environment-driven configurability is needed for MVP; keeps implementation simple.
-
-## 17. High-Fidelity In-Memory LibSQL Testing
+## 16. In-Memory LibSQL Testing
 
 - **Decision:** Use an in-memory LibSQL client with the production Drizzle migrations applied via a `beforeAll` hook in the test setup.
-- **Rationale:** Ensures that tests verify interactions against the actual database schema (indexes, constraints, etc.) without the overhead of a persistent database or network latency.
+- **Rationale:** Ensures that tests verify interactions against the actual database schema (indexes, constraints, etc.) without the overhead of a persistent database or network latency. Used for all tests — unit and integration — given the project's scale will never introduce meaningful performance overhead.
 
-## 18. Build vs. Create Factory Pattern
+## 17. Build vs. Create Factory Pattern
 
 - **Decision:** Formally separate data generation (`build[Entity]`) from database persistence (`create[Entity]`) in test factories.
 - **Rationale:** Allows for high-speed unit tests that only need plain objects, while still providing a clean API for integration tests that require a database state.
 
-## 19. Isolated Query Condition Builders
-
-- **Decision:** Extract complex Drizzle `WHERE` clause logic into pure, standalone functions (e.g., `buildCustomExercisesWhere`).
-- **Rationale:** Improves testability by allowing filtering logic to be verified independently of database execution and adheres to the Single Responsibility Principle.
-
-## 20. Global Mocking for Database Testing
+## 18. Global Mocking for Database Testing
 
 - **Decision:** Use Vitest's `vi.mock` to globally intercept the `@/lib/db` module and inject the in-memory `testDb` instance.
 - **Rationale:** Prioritizes implementation simplicity and keeps production code clean of dependency injection "plumbing," which is acceptable given the project's current scale and complexity.
-
-## 21. Defer Test Robustness for URL State Hook
-
-- **Date:** 2026-03-22
-- **Task:** TASK-036 (Exercise Library - Unified Search & Filters)
-- **Decision:** Defer refactoring of `useExercises` tests to be integration-style (State-In/State-Out).
-- **Rationale:**
-  - **Scope:** Primary goal of moving state to URL is achieved and verified.
-  - **Risk:** Major test refactor risks instability and delay.
-  - **Coverage:** Existing tests, while coupled to mocks, provide sufficient confidence for MVP.
-- **Consequences:** Tests remain coupled to `next/navigation` mocks; future refactors will require test updates.
