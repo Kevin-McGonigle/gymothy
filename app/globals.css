@@ -126,3 +126,8 @@
     @apply font-sans;
   }
 }
+
+/* Focus Mode: hide bottom nav during active workout */
+body:has([data-focus-mode]) [data-slot="bottom-nav"] {
+  display: none;
+}

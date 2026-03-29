@@ -42,8 +42,8 @@
           "options": {
             "patterns": [
               {
-                "group": ["@/modules/*/**"],
-                "message": "Import from the module's public API (e.g., @/modules/exercises), not its internals."
+                "group": ["@/modules/*/**", "!@/modules/*/client"],
+                "message": "Import from the module's public API (e.g., @/modules/exercises or @/modules/exercises/client), not its internals."
               }
             ]
           }

@@ -63,7 +63,7 @@ modules/
 
 ### 3.2 Single Entry Point
 
-Each module has one `index.ts` that defines its public API. **Importing from a module's internal files is prohibited.** Enforce via [Biome `noRestrictedImports`](https://biomejs.dev/linter/rules/no-restricted-imports/) and code review.
+Each module has one `index.ts` that defines its server-side public API. Modules that export client-side hooks or functions (requiring `"use client"`) use a second entry point: `client.ts`. **Importing from any other internal file is prohibited.** Enforce via [Biome `noRestrictedImports`](https://biomejs.dev/linter/rules/no-restricted-imports/) and code review.
 
 ```jsonc
 // biome.json — example constraint
