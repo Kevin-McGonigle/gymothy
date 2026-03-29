@@ -142,10 +142,13 @@ export async function signIn(input: {
 export async function signUp(input: {
   email: string;
   password: string;
-  name: string;
+  name?: string;
 }): Promise<AuthResultDTO> {
   try {
-    const result = await auth.api.signUpEmail({ body: input });
+    const name = input.name || input.email.split("@")[0];
+    const result = await auth.api.signUpEmail({
+      body: { email: input.email, password: input.password, name },
+    });
     if (!result.token) throw new AuthError("Sign-up did not return a token");
     return {
       token: result.token,

@@ -57,6 +57,15 @@ describe("auth module", () => {
       expect(prefs.onboardingCompleted).toBe(false);
     });
 
+    it("should default name to email prefix when name is omitted", async () => {
+      const result = await signUp({
+        email: "jane.doe@example.com",
+        password: "password123",
+      });
+
+      expect(result.user.name).toBe("jane.doe");
+    });
+
     it("should throw AuthError on duplicate email", async () => {
       await signUp({
         email: "dup@example.com",
