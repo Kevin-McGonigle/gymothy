@@ -13,7 +13,7 @@ vi.mock("next/navigation", () => ({
 const mockSignOut = vi.fn(() => Promise.resolve());
 
 vi.mock("@/modules/auth/client", () => ({
-  signOut: (...args: unknown[]) => mockSignOut(...args),
+  signOut: () => mockSignOut(),
 }));
 
 describe("BurgerMenu", () => {
