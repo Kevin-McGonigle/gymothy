@@ -32,9 +32,9 @@ export function BottomNav() {
 
       <Link
         href={ROUTES.WORKOUT_NEW}
-        className="flex flex-col items-center gap-1 py-2 text-xs text-primary-foreground"
+        className="flex flex-col items-center gap-1 py-2 text-xs text-muted-foreground"
       >
-        <span className="flex size-10 items-center justify-center rounded-full bg-primary shadow-sm">
+        <span className="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
           <PlusIcon className="size-5" />
         </span>
         Start Workout
