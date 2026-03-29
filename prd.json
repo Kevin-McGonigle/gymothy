@@ -143,7 +143,7 @@
             "Unit tests verify redirect behavior for authenticated and unauthenticated states."
           ],
           "dependencies": ["TASK-005"],
-          "completed": false
+          "completed": true
         },
         {
           "id": "TASK-008",
