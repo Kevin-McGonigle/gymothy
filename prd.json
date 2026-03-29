@@ -84,7 +84,7 @@
             "No third-party PWA dependencies added."
           ],
           "dependencies": ["TASK-001"],
-          "completed": false
+          "completed": true
         }
       ]
     },
