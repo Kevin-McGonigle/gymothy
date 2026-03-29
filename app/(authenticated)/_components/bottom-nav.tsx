@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ROUTES } from "@/shared/constants";
 import { cn } from "@/shared/utils";
-import { BurgerMenu } from "./burger-menu";
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -52,8 +51,6 @@ export function BottomNav() {
         <BookOpenIcon className="size-5" />
         Routines
       </Link>
-
-      <BurgerMenu />
     </nav>
   );
 }

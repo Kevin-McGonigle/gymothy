@@ -23,14 +23,13 @@ export function BurgerMenu() {
   return (
     <Menu.Root>
       <Menu.Trigger
-        className="flex flex-1 flex-col items-center gap-1 py-3 text-xs text-muted-foreground"
+        className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
         aria-label="Menu"
       >
         <MenuIcon className="size-5" />
-        More
       </Menu.Trigger>
       <Menu.Portal>
-        <Menu.Positioner side="top" align="end" sideOffset={8}>
+        <Menu.Positioner side="bottom" align="end" sideOffset={4}>
           <Menu.Popup className="min-w-40 rounded-lg border bg-popover p-1 shadow-md">
             <Menu.LinkItem
               render={<Link href={ROUTES.SETTINGS} />}

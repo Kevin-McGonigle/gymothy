@@ -7,8 +7,6 @@ const mockUsePathname = vi.fn(() => "/");
 
 vi.mock("next/navigation", () => ({
   usePathname: () => mockUsePathname(),
-  // BurgerMenu (child of BottomNav) calls useRouter
-  useRouter: vi.fn(() => ({ push: vi.fn() })),
 }));
 
 describe("BottomNav", () => {
