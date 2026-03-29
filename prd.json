@@ -199,7 +199,7 @@
             "All E2E tests pass on mobile viewport."
           ],
           "dependencies": ["TASK-008"],
-          "completed": false
+          "completed": true
         }
       ]
     },
