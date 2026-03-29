@@ -57,10 +57,9 @@ describe("LoginForm", () => {
     await user.click(screen.getByRole("button", { name: /sign in/i }));
 
     await waitFor(() => {
-      expect(receivedFormData).not.toBeNull();
+      expect(receivedFormData?.get("email")).toBe("test@example.com");
+      expect(receivedFormData?.get("password")).toBe("secret123");
     });
-    expect(receivedFormData?.get("email")).toBe("test@example.com");
-    expect(receivedFormData?.get("password")).toBe("secret123");
   });
 
   it("disables button while submitting", async () => {
