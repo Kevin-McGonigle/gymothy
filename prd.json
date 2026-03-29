@@ -109,7 +109,7 @@
             "Integration tests verify: sign-up creates user and preferences, sign-in returns session, getUserPreferences returns defaults, updateUserPreferences persists changes."
           ],
           "dependencies": ["TASK-002", "TASK-003"],
-          "completed": false
+          "completed": true
         },
         {
           "id": "TASK-006",

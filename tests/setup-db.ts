@@ -1,3 +1,7 @@
+process.env.BETTER_AUTH_SECRET =
+  "test-secret-at-least-32-characters-long-for-auth";
+process.env.BETTER_AUTH_URL = "http://localhost:3000";
+
 import { createClient } from "@libsql/client";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
