@@ -29,6 +29,15 @@
   3. Optimistic local mutations, sync only on finish (simplest, highest data-loss risk).
 - **Constraints:** localStorage prevents tab-sleep data loss (Decision 5). Server persistence prevents cross-device/clear-cache data loss. Both are needed.
 
+### Cardio/Machine Exercise Tracking — Resistance Component
+
+- **Status:** Unresolved — revisit during workout feature implementation.
+- **Context:** Cardio and machine exercises (treadmill, stationary bike, elliptical, rower, stepmill) have a "resistance" dimension beyond distance and time — incline on a treadmill, resistance level on a bike/rower, speed setting on a stepmill. The current `distance_time` type tracks distance + duration but has no field for resistance/intensity. The stepmill is particularly problematic: `duration` alone isn't enough to track progress (floors climbed matters, but so does speed/resistance).
+- **Options:**
+  1. Add a nullable `resistance` (or `intensity`) integer field to `WorkoutSet` — generic enough for incline, resistance level, speed, etc.
+  2. Repurpose the existing `weight` field for resistance on cardio exercises (semantically awkward but no schema change).
+  3. Defer — accept that cardio tracking is limited for MVP. Users can use notes for machine settings.
+
 ---
 
 ## 1. Authentication
@@ -41,11 +50,11 @@
 - **Decision:** Defer move to edge-compatible JWT/Cookie-only session validation.
 - **Rationale:** The initial implementation uses `auth.api.getSession` (database-backed) for maximum security and simplicity during the MVP phase. While this adds latency to protected routes, it ensures immediate session invalidation and consistent state. Performance optimization will be revisited if scale requires it.
 
-## 2. Exercise Database
+## 2. Exercise Database — Owned Curated Dataset
 
-- **Decision:** Index ExerciseDB data into the local database. All search and filtering operates against a single local source.
-- **Rationale:** ExerciseDB is a relatively static dataset. Dual-source search (API + local DB merged client-side) introduced needless complexity in the first iteration. A local index with periodic syncs simplifies the data model, eliminates runtime API dependency for reads, and makes search a straightforward DB query. The ExerciseDB service becomes an import/sync tool, not a runtime dependency.
-- **Supersedes:** Previous "Hybrid approach" where global exercises were fetched from the API at runtime and custom exercises stored locally.
+- **Decision:** Maintain a project-owned, curated exercise dataset at `data/exercises.json`. Seeded into the database via `pnpm db:seed`. No runtime dependency on ExerciseDB or any external API.
+- **Rationale:** After importing the full ExerciseDB v1 dataset (~1,500 exercises) and auditing every entry, we found ~25% had data quality issues: wrong type classifications, incorrect instructions, wrong target muscles, equipment mismatches, and ~176 trivial duplicate entries padded with AI-generated filler phrases. Rather than maintaining an API sync with an override table to patch these issues, we took ownership of the dataset. This gives us full control over data quality, eliminates API rate limiting and pagination complexity, and makes seeding instant and deterministic. The dataset was cleaned: duplicates removed, type classifications corrected (stability ball/bosu ball → bodyweight_reps, assisted leverage machine → assisted_bodyweight, cardio machines → distance_time, stretches → duration), and wrong equipment values fixed. Remaining data quality issues (wrong target muscles, wrong instructions) are tracked in `docs/exercise-data-issues.md` for incremental cleanup.
+- **Supersedes:** Decision 2 (original) which described indexing from ExerciseDB with periodic syncs. The API is no longer used.
 
 ## 3. Progression Engine (MVP)
 
@@ -86,9 +95,9 @@
 
 ## 7. Unified Exercise Model
 
-- **Decision:** Use a single `Exercise` table for both ExerciseDB-sourced and user-created exercises.
-- **Rationale:** With local indexing (Decision 2), all exercises — whether originally from ExerciseDB or user-created — live in the same table. ExerciseDB exercises are distinguished by a non-null `external_id`. This simplifies foreign key relationships and ensures all workout/routine records point to a single local UUID. History remains readable regardless of API availability.
-- **Supersedes:** Previous "Shadow" model where exercises were copied into the local DB on-demand when added to a routine or workout. Now the full dataset is indexed upfront.
+- **Decision:** Use a single `Exercise` table for both curated global exercises and user-created custom exercises.
+- **Rationale:** All exercises live in the same table. Global exercises (from the curated dataset) are distinguished by a non-null `external_id`. Custom exercises have `external_id = NULL` and a non-null `user_id`. This simplifies foreign key relationships and ensures all workout/routine records point to a single local UUID.
+- **Note:** The `external_id` column retains the original ExerciseDB IDs for provenance but is functionally redundant now that we own the dataset. Removing it would require migrating visibility scoping to use `user_id IS NULL` for global exercises instead. Tracked for future cleanup.
 
 ## 8. Qualitative Feedback System
 

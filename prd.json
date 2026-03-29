@@ -227,20 +227,20 @@
         },
         {
           "id": "TASK-011",
-          "description": "ExerciseDB indexing service. Import function within modules/exercises/ that fetches the full ExerciseDB dataset and upserts into the local database. Includes type inference mapping (equipment -> exercise type). Idempotent.",
+          "description": "Exercise dataset seeding. Export the ExerciseDB dataset to a local JSON file owned by the project. Fix data quality issues (type misclassifications, wrong equipment values, duplicates). Seed function reads the local file and upserts into the database. No runtime API dependency.",
           "effort": "M",
           "stories": ["US-EX-1"],
           "acceptance_criteria": [
-            "An indexExerciseDb function exists in modules/exercises/.",
-            "Fetches all exercises from ExerciseDB API (paginated, handles full dataset).",
-            "Maps ExerciseDB response fields to local schema (exerciseId -> externalId, gifUrl -> imageUrl, etc.).",
-            "Infers exercise type from equipment value per docs/data-model.md mapping (body weight -> bodyweight_reps, assisted -> assisted_bodyweight, weighted -> weighted_bodyweight, cardio equipment -> duration, all others -> weight_reps).",
-            "Upserts by externalId — safe to re-run without duplicates.",
-            "package.json includes a db:seed script that executes the indexing function.",
-            "Tests use MSW to mock ExerciseDB API responses and verify correct mapping and upsert behavior."
+            "A curated JSON dataset file exists at data/exercises.json containing ~1,318 exercises (after dedup and cleanup).",
+            "Each exercise has correct type classification — stability ball/bosu ball → bodyweight_reps, assisted leverage machine → assisted_bodyweight, cardio machines → distance_time, stretches/holds → duration, running/sprints → distance_time.",
+            "Known upstream issues fixed: wrong equipment values, ~176 trivial duplicates removed, ~62 type corrections applied. Remaining data quality issues tracked in docs/exercise-data-issues.md.",
+            "A seedExercises function exists in modules/exercises/ that reads data/exercises.json and upserts into the database by externalId. Idempotent.",
+            "package.json includes a db:seed script that executes the seed function via tsx.",
+            "Integration tests verify: seeding populates the database correctly, upsert is idempotent (re-run produces no duplicates), type distribution matches expected counts.",
+            "pnpm db:seed succeeds against local database."
           ],
           "dependencies": ["TASK-010"],
-          "completed": false
+          "completed": true
         },
         {
           "id": "TASK-012",
@@ -255,6 +255,60 @@
             "All tests pass via pnpm test."
           ],
           "dependencies": ["TASK-011"],
+          "completed": false
+        },
+        {
+          "id": "TASK-038",
+          "description": "Exercise data curation. Fix upstream ExerciseDB data quality issues in data/exercises.json. Correct wrong target muscles, fix incorrect instructions, resolve equipment mismatches, fix name typos and encoding issues. Update stale ExerciseDB references across project docs (data-model.md, brief.md, user-stories.md, ux-flows.md, README.md). See docs/exercise-data-issues.md for the full issue tracker.",
+          "effort": "L",
+          "stories": ["US-EX-1"],
+          "acceptance_criteria": [
+            "All issues documented in docs/exercise-data-issues.md are resolved.",
+            "Wrong target muscles corrected for all flagged exercises (~70-100).",
+            "Wrong instructions fixed for all flagged exercises (~80-120), especially reverse grip descriptions.",
+            "Equipment mismatches resolved — missing equipment added to exercises that require stability balls, rings, suspension straps, etc.",
+            "Name typos and encoding issues fixed (Cyrillic degree symbol, misspellings).",
+            "Stale ExerciseDB API references removed from docs/data-model.md, docs/brief.md, docs/user-stories.md, docs/ux-flows.md, README.md.",
+            "ExerciseDB API skill (.agents/skills/exercisedb-api/) removed or archived.",
+            "MSW handlers for ExerciseDB API (tests/mocks/handlers.ts) cleaned up.",
+            "pnpm db:seed succeeds with updated dataset.",
+            "Instruction step prefixes ('Step:1 ', 'Step:2 ', etc.) stripped from all exercises — ordering is implicit from array position.",
+            "docs/exercise-data-issues.md updated to reflect resolved items."
+          ],
+          "dependencies": ["TASK-011"],
+          "completed": false
+        },
+        {
+          "id": "TASK-039",
+          "description": "Refactor auth module barrel. Split modules/auth/index.ts into internal files (types, errors, queries/operations) with index.ts as a pure re-export barrel, matching the pattern established in modules/exercises/.",
+          "effort": "S",
+          "stories": [],
+          "acceptance_criteria": [
+            "modules/auth/index.ts is a pure barrel file containing only re-exports.",
+            "Implementation split into internal files (e.g., types.ts, operations.ts, or similar logical grouping).",
+            "Public API surface unchanged — all existing exports still available from @/modules/auth.",
+            "Internal test files import from actual source files, not the barrel.",
+            "All tests pass."
+          ],
+          "dependencies": [],
+          "completed": false
+        },
+        {
+          "id": "TASK-040",
+          "description": "Remove external_id from exercise schema. The column is a legacy artifact from ExerciseDB integration. Migrate visibility scoping to use userId IS NULL for global exercises. Update seed function, queries, dataset, and tests.",
+          "effort": "S",
+          "stories": ["US-EX-1"],
+          "acceptance_criteria": [
+            "external_id column removed from exercise table schema.",
+            "Migration generated and applied.",
+            "Visibility scoping in getExercises uses userId IS NULL instead of externalId IS NOT NULL.",
+            "seedExercises uses a different upsert strategy (e.g., by name or a new stable ID).",
+            "data/exercises.json no longer contains externalId field.",
+            "ExerciseDTO no longer includes externalId.",
+            "All tests updated and passing.",
+            "Decision 7 in docs/decisions.md updated."
+          ],
+          "dependencies": ["TASK-038"],
           "completed": false
         }
       ]
