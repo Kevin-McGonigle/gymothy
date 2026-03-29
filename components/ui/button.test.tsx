@@ -30,4 +30,14 @@ describe("Button", () => {
     rerender(<Button ref={ref}>Click again</Button>);
     expect(ref.current).toBe(firstRef);
   });
+
+  it("renders as a different element via render prop", () => {
+    render(
+      // biome-ignore lint/a11y/useAnchorContent: content provided by Button children
+      <Button render={<a href="/test" />}>Link Button</Button>,
+    );
+    const link = screen.getByRole("link", { name: /link button/i });
+    expect(link).toHaveAttribute("href", "/test");
+    expect(link.tagName).toBe("A");
+  });
 });

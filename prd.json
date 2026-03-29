@@ -171,7 +171,7 @@
             "Component tests verify nav bar rendering, active state, and empty states."
           ],
           "dependencies": ["TASK-003", "TASK-006", "TASK-007"],
-          "completed": false
+          "completed": true
         },
         {
           "id": "TASK-009",

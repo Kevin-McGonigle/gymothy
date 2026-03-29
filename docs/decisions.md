@@ -179,3 +179,8 @@
 
 - **Decision:** Use Vitest v4 `projects` config (not `environmentMatchGlobs`) to scope `jsdom` to component tests (`*.test.tsx`) and `node` to module tests (`*.test.ts`). Each project has its own setup files: component tests get MSW/RTL setup, module tests get DB setup.
 - **Rationale:** `environmentMatchGlobs` was removed in Vitest v4. The `projects` API replaces it with more granular control — each project can have its own environment, setup files, and include patterns.
+
+## 25. Dual Module Entry Points (Server + Client)
+
+- **Decision:** Modules may have two public entry points: `index.ts` (server) and `client.ts` (client, `"use client"`). The Biome `noRestrictedImports` rule uses a negated glob (`!@/modules/*/client`) to allow `client.ts` while blocking all other internals.
+- **Rationale:** Next.js enforces a hard boundary between server and client code. `index.ts` often uses server-only APIs (`headers()`, direct DB access) that cannot be bundled into client components. Client-side hooks and functions (`useSession`, `signOut`) need a separate `"use client"` entry point. The alternative — a single `index.ts` — would either taint the module with `"use client"` or require re-architecting the server-side code.
