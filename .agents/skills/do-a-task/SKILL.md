@@ -64,7 +64,7 @@ Before any code changes or branch creation, you **MUST** output this checklist a
 3. **Code:** Implement the plan. **You MUST use the `tdd` skill to drive any development.**
 4. **Verify:** You must satisfy these checks:
    - `pnpm test`
-   - `pnpm test:e2e --reporter=json`
+   - `pnpm test:e2e`
    - `pnpm lint`
    - `pnpm build`
 5. **Agent-Browser:** Use `agent-browser` + `pnpm dev` to verify UI/UX if applicable.

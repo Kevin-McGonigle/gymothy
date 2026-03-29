@@ -2,7 +2,8 @@ import "@/tests/setup-db";
 import { describe, expect, it } from "vitest";
 import { createExercise } from "@/tests/factories/exercise.factory";
 import { createUser } from "@/tests/factories/user.factory";
-import { ExerciseNotFoundError, getExerciseById, getExercises } from ".";
+import { ExerciseNotFoundError } from "./errors";
+import { getExerciseById, getExercises } from "./queries";
 
 describe("exercises module", () => {
   describe("getExerciseById", () => {
