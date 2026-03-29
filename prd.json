@@ -223,7 +223,7 @@
             "Integration tests cover: search, each filter type, combined filters, pagination, exercise by ID, empty results, userId scoping (custom exercises only visible to their owner)."
           ],
           "dependencies": ["TASK-002"],
-          "completed": false
+          "completed": true
         },
         {
           "id": "TASK-011",
@@ -328,7 +328,7 @@
             "Saving the routine persists all data and redirects to /routines/[id].",
             "/routines/[id] displays full routine detail: groups, exercises, target values.",
             "Delete action with confirmation removes routine and redirects to /routines.",
-            "Server actions validate session, call routines module, revalidate/redirect. No business logic in actions.",
+            "Server actions validate session, call routines module, revalidate/redirect. No business logic in actions. Server actions that accept pagination inputs (offset/limit) must validate and clamp them before passing to module functions (e.g., limit clamped to 1–100, offset >= 0).",
             "Component tests for builder form interactions and detail view rendering.",
             "If this task exceeds context limits, split into: (a) /routines list + /routines/[id] detail, (b) /routines/new builder."
           ],
