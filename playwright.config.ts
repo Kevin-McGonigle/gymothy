@@ -1,41 +1,53 @@
 import { defineConfig, devices } from "@playwright/test";
+import { STORAGE_STATE } from "./tests/e2e/helpers";
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  globalTeardown: "./tests/e2e/global-teardown.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: "html",
+  reporter: [
+    ["html", { open: "never" }],
+    ["json", { outputFile: "test-results/results.json" }],
+  ],
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
   },
   projects: [
+    { name: "setup", testMatch: /\.setup\.ts$/ },
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      dependencies: ["setup"],
+      use: { ...devices["Desktop Chrome"], storageState: STORAGE_STATE },
     },
     {
       name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
+      dependencies: ["setup"],
+      use: { ...devices["Desktop Firefox"], storageState: STORAGE_STATE },
     },
     {
       name: "webkit",
-      use: { ...devices["Desktop Safari"] },
+      dependencies: ["setup"],
+      use: { ...devices["Desktop Safari"], storageState: STORAGE_STATE },
     },
     {
       name: "mobile-chrome",
-      use: { ...devices["Pixel 5"] },
+      dependencies: ["setup"],
+      use: { ...devices["Pixel 5"], storageState: STORAGE_STATE },
     },
     {
       name: "mobile-safari",
-      use: { ...devices["iPhone 12"] },
+      dependencies: ["setup"],
+      use: { ...devices["iPhone 12"], storageState: STORAGE_STATE },
     },
   ],
   webServer: {
-    command: "pnpm dev",
+    command: "pnpm build && pnpm start",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
   },
 });
