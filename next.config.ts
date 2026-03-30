@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "exercisedb.dev",
+        hostname: "static.exercisedb.dev",
         pathname: "/**",
       },
     ],

@@ -5,14 +5,18 @@ import { describe, expect, it } from "vitest";
 import { getExercises } from "./queries";
 import { seedExercises } from "./seed";
 
+const datasetSize = JSON.parse(
+  readFileSync(resolve(process.cwd(), "data/exercises.json"), "utf-8"),
+).length as number;
+
 describe("seedExercises", () => {
   it("should populate the database from the JSON dataset", async () => {
     const result = await seedExercises();
 
-    expect(result.seeded).toBe(1318);
+    expect(result.seeded).toBe(datasetSize);
 
     const { total } = await getExercises({ limit: 1 });
-    expect(total).toBe(1318);
+    expect(total).toBe(datasetSize);
   });
 
   it("should be idempotent — no duplicates on re-run", async () => {
@@ -20,7 +24,7 @@ describe("seedExercises", () => {
     await seedExercises();
 
     const { total } = await getExercises({ limit: 1 });
-    expect(total).toBe(1318);
+    expect(total).toBe(datasetSize);
   });
 
   it("should assign correct types to exercises that were misclassified by equipment heuristic", async () => {

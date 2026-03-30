@@ -153,7 +153,7 @@ Exercise browsing is always **in-context** — accessed when adding exercises to
 
 - **Search:** Text search against exercise name.
 - **Filters:** Body part, equipment, target muscle.
-- **Results:** Single list from the local database (both ExerciseDB-indexed and custom exercises).
+- **Results:** Single list from the local database (both seeded global exercises and custom exercises).
 - **Custom Exercises:** Visually distinguished. Option to create a new custom exercise inline.
 
 ---

@@ -6,7 +6,7 @@
 
 ### Exercise & Workout Engine
 
-- **Unified Exercise Database:** ExerciseDB dataset indexed locally, plus user-defined custom exercises. Single source for search and filtering.
+- **Unified Exercise Database:** Curated exercise dataset seeded locally, plus user-defined custom exercises. Single source for search and filtering.
 - **Flexible Inputs:** Support for Weight + Reps, Bodyweight (Assisted/Weighted), Duration (Planks), and Cardio (Distance/Time).
 - **Supersets:** Group exercises into cards to allow alternating sets between different movements.
 - **Smart History:** Unlimited data retention with simple trend visualization (Volume over time).

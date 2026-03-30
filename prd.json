@@ -258,7 +258,7 @@
           "completed": false
         },
         {
-          "id": "TASK-038",
+          "id": "TASK-041",
           "description": "Exercise data curation. Fix upstream ExerciseDB data quality issues in data/exercises.json. Correct wrong target muscles, fix incorrect instructions, resolve equipment mismatches, fix name typos and encoding issues. Update stale ExerciseDB references across project docs (data-model.md, brief.md, user-stories.md, ux-flows.md, README.md). See docs/exercise-data-issues.md for the full issue tracker.",
           "effort": "L",
           "stories": ["US-EX-1"],
@@ -276,10 +276,10 @@
             "docs/exercise-data-issues.md updated to reflect resolved items."
           ],
           "dependencies": ["TASK-011"],
-          "completed": false
+          "completed": true
         },
         {
-          "id": "TASK-039",
+          "id": "TASK-042",
           "description": "Refactor auth module barrel. Split modules/auth/index.ts into internal files (types, errors, queries/operations) with index.ts as a pure re-export barrel, matching the pattern established in modules/exercises/.",
           "effort": "S",
           "stories": [],
@@ -294,7 +294,7 @@
           "completed": false
         },
         {
-          "id": "TASK-040",
+          "id": "TASK-043",
           "description": "Remove external_id from exercise schema. The column is a legacy artifact from ExerciseDB integration. Migrate visibility scoping to use userId IS NULL for global exercises. Update seed function, queries, dataset, and tests.",
           "effort": "S",
           "stories": ["US-EX-1"],
@@ -308,7 +308,23 @@
             "All tests updated and passing.",
             "Decision 7 in docs/decisions.md updated."
           ],
-          "dependencies": ["TASK-038"],
+          "dependencies": ["TASK-041"],
+          "completed": false
+        },
+        {
+          "id": "TASK-044",
+          "description": "Exercise data terminology audit. Normalize muscle names (e.g., quads vs quadriceps), equipment values, and body part labels across the full dataset for consistency. Review all distinct values and establish canonical names.",
+          "effort": "M",
+          "acceptance_criteria": [
+            "All target muscle values use consistent terminology (e.g., no mix of quads/quadriceps).",
+            "All secondary muscle values use consistent terminology matching target muscle vocabulary.",
+            "All equipment values are consistent and well-defined.",
+            "All body part values are consistent.",
+            "band single leg reverse calf raise target corrected to tibialis anterior (or equivalent canonical name).",
+            "pnpm db:seed succeeds.",
+            "pnpm test passes."
+          ],
+          "dependencies": ["TASK-041"],
           "completed": false
         }
       ]
