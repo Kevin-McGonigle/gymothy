@@ -255,7 +255,7 @@
             "All tests pass via pnpm test."
           ],
           "dependencies": ["TASK-011"],
-          "completed": false
+          "completed": true
         },
         {
           "id": "TASK-041",
