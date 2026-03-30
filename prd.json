@@ -325,7 +325,7 @@
             "pnpm test passes."
           ],
           "dependencies": ["TASK-041"],
-          "completed": false
+          "completed": true
         }
       ]
     },

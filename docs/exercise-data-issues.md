@@ -14,7 +14,16 @@ All categories below have been resolved:
 - All `Step:N ` instruction prefixes stripped
 - Dataset: 1,318 → 1,317 exercises
 
-**Remaining:** Terminology consistency audit (e.g., `quads` vs `quadriceps` normalization) tracked as TASK-044.
+## Resolution (TASK-044, 2026-03-30)
+
+Terminology consistency audit — all values normalized to a canonical taxonomy codified in `modules/exercises/taxonomy.ts`.
+
+- **Body parts:** `back` split into `upper back`/`lower back`; `waist` renamed to `core`; 38 body part mismatches corrected
+- **Target muscles:** `spine` → `erector spinae`; `levator scapulae` → `neck`; 87 `upper back` targets reclassified to `traps`/`rhomboids`/both
+- **Secondary muscles:** 20 rename rules applied (e.g., `shoulders` → `delts`, `quadriceps` → `quads`, `core` → `abs`); 11 per-exercise `back` → `lats`/`erector spinae` mappings; dropped `ankles`/`ankle stabilizers`/`feet`; 11 target/secondary overlaps resolved
+- **Compound exercises:** 31 exercises gained multi-target arrays (deadlifts, cleans, thrusters, farmer's walk, etc.)
+- **Validation:** Zod enums enforce canonical vocabulary at seed time
+- **Additional fixes:** 8 misclassified targets/secondaries caught during review (rope climb, smith toe raise, spider crawl push up, stalder press, wind sprints, cable one arm lateral bent-over, barbell palms up wrist curl, roller side lat stretch)
 
 ## Original Audit Summary
 
