@@ -5,6 +5,7 @@ import { sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { exercise } from "@/lib/db/schema";
+import { bodyPartSchema, equipmentSchema, muscleSchema } from "./taxonomy";
 
 // 100 rows × 8 columns = 800 params, safely under SQLite's default 999-param limit
 const UPSERT_BATCH_SIZE = 100;
@@ -13,10 +14,10 @@ const exerciseDataSchema = z.object({
   name: z.string(),
   type: z.enum(exercise.type.enumValues),
   imageUrl: z.string().nullable(),
-  targetMuscles: z.array(z.string()),
-  bodyParts: z.array(z.string()),
-  equipments: z.array(z.string()),
-  secondaryMuscles: z.array(z.string()),
+  targetMuscles: z.array(muscleSchema),
+  bodyParts: z.array(bodyPartSchema),
+  equipments: z.array(equipmentSchema),
+  secondaryMuscles: z.array(muscleSchema),
   instructions: z.array(z.string()).nullable(),
 }) satisfies z.ZodType<
   Pick<
