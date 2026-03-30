@@ -6,11 +6,10 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { exercise } from "@/lib/db/schema";
 
-// 100 rows × 9 columns = 900 params, safely under SQLite's default 999-param limit
+// 100 rows × 8 columns = 800 params, safely under SQLite's default 999-param limit
 const UPSERT_BATCH_SIZE = 100;
 
 const exerciseDataSchema = z.object({
-  externalId: z.string(),
   name: z.string(),
   type: z.enum(exercise.type.enumValues),
   imageUrl: z.string().nullable(),
@@ -22,7 +21,6 @@ const exerciseDataSchema = z.object({
 }) satisfies z.ZodType<
   Pick<
     typeof exercise.$inferInsert,
-    | "externalId"
     | "name"
     | "type"
     | "imageUrl"
@@ -55,10 +53,9 @@ export async function seedExercises(): Promise<{ seeded: number }> {
       .insert(exercise)
       .values(batch)
       .onConflictDoUpdate({
-        target: exercise.externalId,
-        targetWhere: sql`${exercise.externalId} IS NOT NULL`,
+        target: exercise.name,
+        targetWhere: sql`user_id IS NULL`,
         set: {
-          name: sql`excluded.name`,
           imageUrl: sql`excluded.image_url`,
           type: sql`excluded.type`,
           targetMuscles: sql`excluded.target_muscles`,

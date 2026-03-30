@@ -77,7 +77,6 @@ export const exercise = sqliteTable(
     id: text("id")
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
-    externalId: text("external_id"),
     userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     type: text("type", {
@@ -119,9 +118,9 @@ export const exercise = sqliteTable(
       .$onUpdate(() => new Date()),
   },
   (table) => [
-    uniqueIndex("exercise_external_id_idx")
-      .on(table.externalId)
-      .where(sql`external_id IS NOT NULL`),
+    uniqueIndex("exercise_name_global_idx")
+      .on(table.name)
+      .where(sql`user_id IS NULL`),
     index("exercise_user_id_idx").on(table.userId),
     index("exercise_name_idx").on(table.name),
   ],

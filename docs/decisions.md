@@ -96,8 +96,8 @@
 ## 7. Unified Exercise Model
 
 - **Decision:** Use a single `Exercise` table for both curated global exercises and user-created custom exercises.
-- **Rationale:** All exercises live in the same table. Global exercises (from the curated dataset) are distinguished by a non-null `external_id`. Custom exercises have `external_id = NULL` and a non-null `user_id`. This simplifies foreign key relationships and ensures all workout/routine records point to a single local UUID.
-- **Note:** The `external_id` column retains the original ExerciseDB IDs for provenance but is functionally redundant now that we own the dataset. Removing it would require migrating visibility scoping to use `user_id IS NULL` for global exercises instead. Tracked for future cleanup.
+- **Rationale:** All exercises live in the same table. Global exercises (from the curated dataset) are distinguished by `user_id IS NULL`. Custom exercises have a non-null `user_id`. This simplifies foreign key relationships and ensures all workout/routine records point to a single local UUID.
+- **Note:** The `external_id` column (original ExerciseDB IDs) was removed as functionally redundant. Visibility scoping uses `user_id IS NULL` for global exercises. Seed deduplication uses a partial unique index on `name` where `user_id IS NULL`.
 
 ## 8. Qualitative Feedback System
 

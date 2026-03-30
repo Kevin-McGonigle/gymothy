@@ -66,10 +66,7 @@ describe("seedExercises", () => {
     const original = readFileSync(filePath, "utf-8");
 
     try {
-      writeFileSync(
-        filePath,
-        JSON.stringify([{ externalId: "bad", name: 123 }]),
-      );
+      writeFileSync(filePath, JSON.stringify([{ name: 123 }]));
       await expect(seedExercises()).rejects.toThrow();
     } finally {
       writeFileSync(filePath, original);

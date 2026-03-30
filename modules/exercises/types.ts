@@ -4,7 +4,6 @@ export type ExerciseType = (typeof exercise.type.enumValues)[number];
 
 export type ExerciseDTO = {
   id: string;
-  externalId: string | null;
   userId: string | null;
   name: string;
   type: ExerciseType;
