@@ -336,6 +336,122 @@ describe("exercises module", () => {
       expect(items[0].name).toBe("Barbell Bench Press");
     });
 
+    it("should match exercise with multiple body parts when filtering by any one", async () => {
+      await createExercise({
+        name: "Arnold Press",
+        bodyParts: ["chest", "shoulders"],
+      });
+      await createExercise({
+        name: "Squat",
+        bodyParts: ["upper legs"],
+      });
+
+      const { items, total } = await getExercises({
+        bodyParts: ["shoulders"],
+      });
+
+      expect(total).toBe(1);
+      expect(items[0].name).toBe("Arnold Press");
+    });
+
+    it("should match exercise with multiple target muscles when filtering by any one", async () => {
+      await createExercise({
+        name: "Bench Press",
+        targetMuscles: ["pectorals", "anterior deltoids"],
+      });
+      await createExercise({
+        name: "Tricep Pushdown",
+        targetMuscles: ["triceps"],
+      });
+
+      const { items, total } = await getExercises({
+        targetMuscles: ["anterior deltoids"],
+      });
+
+      expect(total).toBe(1);
+      expect(items[0].name).toBe("Bench Press");
+    });
+
+    it("should match multi-value filter against exercise with multiple body parts", async () => {
+      await createExercise({
+        name: "Arnold Press",
+        bodyParts: ["chest", "shoulders"],
+      });
+      await createExercise({
+        name: "Squat",
+        bodyParts: ["upper legs"],
+      });
+      await createExercise({
+        name: "Lateral Raise",
+        bodyParts: ["shoulders"],
+      });
+
+      const { items, total } = await getExercises({
+        bodyParts: ["shoulders", "upper legs"],
+      });
+
+      expect(total).toBe(3);
+      expect(items.map((e) => e.name)).toEqual([
+        "Arnold Press",
+        "Lateral Raise",
+        "Squat",
+      ]);
+    });
+
+    it("should paginate filtered results with correct totals", async () => {
+      for (let i = 0; i < 5; i++) {
+        await createExercise({
+          name: `Chest Exercise ${String(i).padStart(2, "0")}`,
+          bodyParts: ["chest"],
+        });
+      }
+      for (let i = 0; i < 3; i++) {
+        await createExercise({
+          name: `Leg Exercise ${String(i).padStart(2, "0")}`,
+          bodyParts: ["upper legs"],
+        });
+      }
+
+      const page1 = await getExercises({
+        bodyParts: ["chest"],
+        limit: 2,
+        offset: 0,
+      });
+      const page2 = await getExercises({
+        bodyParts: ["chest"],
+        limit: 2,
+        offset: 2,
+      });
+      const page3 = await getExercises({
+        bodyParts: ["chest"],
+        limit: 2,
+        offset: 4,
+      });
+
+      expect(page1.total).toBe(5);
+      expect(page1.items).toHaveLength(2);
+      expect(page1.items.map((e) => e.name)).toEqual([
+        "Chest Exercise 00",
+        "Chest Exercise 01",
+      ]);
+
+      expect(page2.total).toBe(5);
+      expect(page2.items).toHaveLength(2);
+      expect(page2.items.map((e) => e.name)).toEqual([
+        "Chest Exercise 02",
+        "Chest Exercise 03",
+      ]);
+
+      expect(page3.total).toBe(5);
+      expect(page3.items).toHaveLength(1);
+      expect(page3.items[0].name).toBe("Chest Exercise 04");
+
+      const allReturned = [...page1.items, ...page2.items, ...page3.items];
+      expect(allReturned.every((e) => e.bodyParts.includes("chest"))).toBe(
+        true,
+      );
+    });
+
     it("should return empty result when no exercises match", async () => {
       const result = await getExercises();
       expect(result).toEqual({ items: [], total: 0 });
