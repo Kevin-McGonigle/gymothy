@@ -6,7 +6,7 @@
 
 - **Focus Mode:** A horizontal card-based interface that shows you only what you need to do right now.
 - **Smart Progression:** A deterministic engine that suggests weight/rep adjustments based on qualitative feedback ("Too Easy", "Solid", "Struggle", "Failure") to keep you in the hypertrophy zone.
-- **Data Integrity:** ExerciseDB indexed locally, ensuring your history is never lost regardless of API availability.
+- **Data Integrity:** Curated exercise dataset seeded locally, ensuring your history is never lost.
 - **Privacy First:** No social features, no data caps, no cloud dependency for core tracking.
 
 ## Tech Stack

@@ -12,9 +12,9 @@
 The single source of truth for all movement definitions (Global or Custom).
 
 - **Indexing Strategy:**
-  - **Global Exercises:** The full ExerciseDB dataset is indexed into the local database upfront, with periodic syncs to pick up additions. Distinguished by a non-null `external_id`.
+  - **Global Exercises:** Seeded from a curated local dataset (`data/exercises.json`) via `pnpm db:seed`. Distinguished by a non-null `external_id`.
   - **Custom Exercises:** Created by the user and stored directly. Distinguished by a non-null `user_id`.
-- **Type Inference:** The `type` field is inferred during ExerciseDB indexing based on the `equipment` value:
+- **Type Inference:** The `type` field is inferred during seeding based on the `equipment` value:
   - `"body weight"` → `bodyweight_reps`
   - `"assisted"` → `assisted_bodyweight`
   - `"weighted"` → `weighted_bodyweight`
@@ -23,7 +23,7 @@ The single source of truth for all movement definitions (Global or Custom).
   - Custom exercises: user selects type at creation.
 - **Attributes:**
   - `id` (UUID - Primary Key)
-  - `external_id` (String, Nullable) — _The ID from ExerciseDB (e.g., "0001"). NULL for Custom._
+  - `external_id` (String, Nullable) — _Original dataset ID for provenance. NULL for Custom._
   - `user_id` (FK -> User, Nullable) — _NULL for Global (shared), UUID for Custom (private)._
   - `name` (String)
   - `type` (Enum: `weight_reps`, `bodyweight_reps`, `weighted_bodyweight`, `assisted_bodyweight`, `duration`, `distance_time`)
@@ -31,8 +31,8 @@ The single source of truth for all movement definitions (Global or Custom).
   - `body_parts` (JSON String Array)
   - `secondary_muscles` (JSON String Array)
   - `equipments` (JSON String Array)
-  - `image_url` (String, Nullable) — _GIF URL from ExerciseDB. NULL for Custom unless user provides one._
-  - `instructions` (JSON String Array, Nullable) — _Step-by-step instructions from ExerciseDB._
+  - `image_url` (String, Nullable) — _GIF URL. NULL for Custom unless user provides one._
+  - `instructions` (JSON String Array, Nullable) — _Step-by-step instructions._
   - `created_at`, `updated_at` (Timestamps)
 - **Indexes:**
   - `external_id` (unique, for sync deduplication)

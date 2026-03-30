@@ -84,11 +84,11 @@ IDs are stable references for the PRD.
 
 ## Exercise Data
 
-### US-EX-1: ExerciseDB Indexed (MVP)
+### US-EX-1: Exercise Dataset Seeded (MVP)
 
-> **Given** the database has been seeded
+> **Given** the database has been seeded with the curated exercise dataset
 > **When** any user searches for exercises
-> **Then** results come from the local database (no runtime API calls to ExerciseDB)
+> **Then** results come from the local database (no runtime API calls)
 
 ### US-EX-2: Search by Name (MVP)
 

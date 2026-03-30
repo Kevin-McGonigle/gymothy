@@ -1,8 +1,22 @@
 # Exercise Data Issues
 
-Findings from a comprehensive audit of all 1,318 exercises in `data/exercises.json` (post-dedup, post-type-correction). These are upstream ExerciseDB data quality issues inherited when we adopted the dataset. Tracked here for incremental cleanup.
+Findings from a comprehensive audit of all exercises in `data/exercises.json` (post-dedup, post-type-correction). These are upstream ExerciseDB data quality issues inherited when we adopted the dataset.
 
-## Summary
+## Resolution (TASK-041, 2026-03-30)
+
+All categories below have been resolved:
+- **65** target/secondary muscle corrections applied (incl. `front lever reps`)
+- **64** instruction fixes (reverse grip terminology, full rewrites, contradiction fixes, quality improvements)
+- **77** equipment fixes (stability ball, rings, suspension strap, preacher bench, treadmill, bosu ball, etc.)
+- **17** name corrections (typos, Cyrillic encoding, nonsense names)
+- **25** standalone secondary muscle fixes (calf raises, wrist curls, lateral raises, `cable reverse wrist curl`)
+- **1** exercise removed (`wheel run` — nonsensical)
+- All `Step:N ` instruction prefixes stripped
+- Dataset: 1,318 → 1,317 exercises
+
+**Remaining:** Terminology consistency audit (e.g., `quads` vs `quadriceps` normalization) tracked as TASK-044.
+
+## Original Audit Summary
 
 | Category | Est. Count | Impact |
 |----------|-----------|--------|
