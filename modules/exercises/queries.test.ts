@@ -16,7 +16,7 @@ describe("exercises module", () => {
     it("should return all DTO fields correctly", async () => {
       const seeded = await createExercise({
         name: "Bench Press",
-        externalId: "ext-001",
+
         type: "weight_reps",
         bodyParts: ["chest"],
         targetMuscles: ["pectorals"],
@@ -30,7 +30,6 @@ describe("exercises module", () => {
 
       expect(result.id).toBe(seeded.id);
       expect(result.name).toBe("Bench Press");
-      expect(result.externalId).toBe("ext-001");
       expect(result.userId).toBeNull();
       expect(result.type).toBe("weight_reps");
       expect(result.bodyParts).toEqual(["chest"]);
@@ -59,8 +58,8 @@ describe("exercises module", () => {
 
   describe("getExercises", () => {
     it("should return global exercises when no userId provided", async () => {
-      await createExercise({ name: "Bench Press", externalId: "ext-001" });
-      await createExercise({ name: "Squat", externalId: "ext-002" });
+      await createExercise({ name: "Bench Press" });
+      await createExercise({ name: "Squat" });
 
       const { items, total } = await getExercises();
 
@@ -71,7 +70,7 @@ describe("exercises module", () => {
 
     it("should exclude custom exercises when no userId provided", async () => {
       const user = await createUser();
-      await createExercise({ name: "Global", externalId: "ext-001" });
+      await createExercise({ name: "Global" });
       await createExercise({ name: "Custom", userId: user.id });
 
       const { items, total } = await getExercises();
@@ -83,7 +82,7 @@ describe("exercises module", () => {
 
     it("should return global + user's custom exercises when userId provided", async () => {
       const user = await createUser();
-      await createExercise({ name: "Global", externalId: "ext-001" });
+      await createExercise({ name: "Global" });
       await createExercise({ name: "My Custom", userId: user.id });
 
       const { items, total } = await getExercises({ userId: user.id });
@@ -96,7 +95,7 @@ describe("exercises module", () => {
     it("should exclude other users' custom exercises", async () => {
       const userA = await createUser();
       const userB = await createUser();
-      await createExercise({ name: "Global", externalId: "ext-001" });
+      await createExercise({ name: "Global" });
       await createExercise({ name: "A's Custom", userId: userA.id });
       await createExercise({ name: "B's Custom", userId: userB.id });
 
@@ -111,7 +110,6 @@ describe("exercises module", () => {
       for (let i = 0; i < 5; i++) {
         await createExercise({
           name: `Exercise ${String(i).padStart(2, "0")}`,
-          externalId: `ext-${i}`,
         });
       }
 
@@ -139,12 +137,11 @@ describe("exercises module", () => {
     });
 
     it("should filter by text search on name", async () => {
-      await createExercise({ name: "Bench Press", externalId: "ext-001" });
+      await createExercise({ name: "Bench Press" });
       await createExercise({
         name: "Incline Bench Press",
-        externalId: "ext-002",
       });
-      await createExercise({ name: "Squat", externalId: "ext-003" });
+      await createExercise({ name: "Squat" });
 
       const { items, total } = await getExercises({ search: "bench" });
 
@@ -157,8 +154,8 @@ describe("exercises module", () => {
     });
 
     it("should escape % metacharacter in search", async () => {
-      await createExercise({ name: "100% effort", externalId: "ext-001" });
-      await createExercise({ name: "100kg bench", externalId: "ext-002" });
+      await createExercise({ name: "100% effort" });
+      await createExercise({ name: "100kg bench" });
 
       const { items } = await getExercises({ search: "100%" });
 
@@ -169,11 +166,9 @@ describe("exercises module", () => {
     it("should escape _ metacharacter in search", async () => {
       await createExercise({
         name: "single_arm curl",
-        externalId: "ext-001",
       });
       await createExercise({
         name: "single arm curl",
-        externalId: "ext-002",
       });
 
       const { items } = await getExercises({ search: "single_arm" });
@@ -185,11 +180,9 @@ describe("exercises module", () => {
     it("should escape \\ metacharacter in search", async () => {
       await createExercise({
         name: "back\\front squat",
-        externalId: "ext-001",
       });
       await createExercise({
         name: "back front squat",
-        externalId: "ext-002",
       });
 
       const { items } = await getExercises({ search: "back\\front" });
@@ -201,17 +194,17 @@ describe("exercises module", () => {
     it("should filter by bodyParts", async () => {
       await createExercise({
         name: "Bench Press",
-        externalId: "ext-001",
+
         bodyParts: ["chest"],
       });
       await createExercise({
         name: "Squat",
-        externalId: "ext-002",
+
         bodyParts: ["upper legs"],
       });
       await createExercise({
         name: "Cable Fly",
-        externalId: "ext-003",
+
         bodyParts: ["chest"],
       });
 
@@ -225,17 +218,17 @@ describe("exercises module", () => {
     it("should match any value within a filter category (OR logic)", async () => {
       await createExercise({
         name: "Bench Press",
-        externalId: "ext-001",
+
         bodyParts: ["chest"],
       });
       await createExercise({
         name: "Barbell Row",
-        externalId: "ext-002",
+
         bodyParts: ["back"],
       });
       await createExercise({
         name: "Bicep Curl",
-        externalId: "ext-003",
+
         bodyParts: ["upper arms"],
       });
 
@@ -251,12 +244,12 @@ describe("exercises module", () => {
     it("should filter by equipments", async () => {
       await createExercise({
         name: "Barbell Bench",
-        externalId: "ext-001",
+
         equipments: ["barbell"],
       });
       await createExercise({
         name: "Dumbbell Fly",
-        externalId: "ext-002",
+
         equipments: ["dumbbell"],
       });
 
@@ -271,12 +264,12 @@ describe("exercises module", () => {
     it("should filter by targetMuscles", async () => {
       await createExercise({
         name: "Bench Press",
-        externalId: "ext-001",
+
         targetMuscles: ["pectorals"],
       });
       await createExercise({
         name: "Tricep Pushdown",
-        externalId: "ext-002",
+
         targetMuscles: ["triceps"],
       });
 
@@ -291,19 +284,19 @@ describe("exercises module", () => {
     it("should apply AND logic across filter categories", async () => {
       await createExercise({
         name: "Barbell Bench Press",
-        externalId: "ext-001",
+
         bodyParts: ["chest"],
         equipments: ["barbell"],
       });
       await createExercise({
         name: "Dumbbell Fly",
-        externalId: "ext-002",
+
         bodyParts: ["chest"],
         equipments: ["dumbbell"],
       });
       await createExercise({
         name: "Barbell Row",
-        externalId: "ext-003",
+
         bodyParts: ["back"],
         equipments: ["barbell"],
       });
@@ -320,17 +313,17 @@ describe("exercises module", () => {
     it("should combine search with filter (AND logic)", async () => {
       await createExercise({
         name: "Barbell Bench Press",
-        externalId: "ext-001",
+
         bodyParts: ["chest"],
       });
       await createExercise({
         name: "Barbell Row",
-        externalId: "ext-002",
+
         bodyParts: ["back"],
       });
       await createExercise({
         name: "Dumbbell Bench Press",
-        externalId: "ext-003",
+
         bodyParts: ["chest"],
       });
 

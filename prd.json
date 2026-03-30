@@ -309,7 +309,7 @@
             "Decision 7 in docs/decisions.md updated."
           ],
           "dependencies": ["TASK-041"],
-          "completed": false
+          "completed": true
         },
         {
           "id": "TASK-044",

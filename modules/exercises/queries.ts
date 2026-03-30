@@ -1,4 +1,4 @@
-import { and, type Column, eq, isNotNull, type SQL, sql } from "drizzle-orm";
+import { and, type Column, eq, isNull, type SQL, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { exercise } from "@/lib/db/schema";
 import { ExerciseNotFoundError } from "./errors";
@@ -11,7 +11,6 @@ import type {
 function toDTO(row: typeof exercise.$inferSelect): ExerciseDTO {
   return {
     id: row.id,
-    externalId: row.externalId,
     userId: row.userId,
     name: row.name,
     type: row.type,
@@ -74,10 +73,10 @@ export async function getExercises(
 
   if (userId) {
     conditions.push(
-      sql`(${exercise.externalId} IS NOT NULL OR ${exercise.userId} = ${userId})`,
+      sql`(${exercise.userId} IS NULL OR ${exercise.userId} = ${userId})`,
     );
   } else {
-    conditions.push(isNotNull(exercise.externalId));
+    conditions.push(isNull(exercise.userId));
   }
 
   const where = and(...conditions);

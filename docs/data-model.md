@@ -12,7 +12,7 @@
 The single source of truth for all movement definitions (Global or Custom).
 
 - **Indexing Strategy:**
-  - **Global Exercises:** Seeded from a curated local dataset (`data/exercises.json`) via `pnpm db:seed`. Distinguished by a non-null `external_id`.
+  - **Global Exercises:** Seeded from a curated local dataset (`data/exercises.json`) via `pnpm db:seed`. Distinguished by `user_id IS NULL`.
   - **Custom Exercises:** Created by the user and stored directly. Distinguished by a non-null `user_id`.
 - **Type Inference:** The `type` field is inferred during seeding based on the `equipment` value:
   - `"body weight"` → `bodyweight_reps`
@@ -23,7 +23,6 @@ The single source of truth for all movement definitions (Global or Custom).
   - Custom exercises: user selects type at creation.
 - **Attributes:**
   - `id` (UUID - Primary Key)
-  - `external_id` (String, Nullable) — _Original dataset ID for provenance. NULL for Custom._
   - `user_id` (FK -> User, Nullable) — _NULL for Global (shared), UUID for Custom (private)._
   - `name` (String)
   - `type` (Enum: `weight_reps`, `bodyweight_reps`, `weighted_bodyweight`, `assisted_bodyweight`, `duration`, `distance_time`)
@@ -35,7 +34,7 @@ The single source of truth for all movement definitions (Global or Custom).
   - `instructions` (JSON String Array, Nullable) — _Step-by-step instructions._
   - `created_at`, `updated_at` (Timestamps)
 - **Indexes:**
-  - `external_id` (unique, for sync deduplication)
+  - `name` (unique, partial — `WHERE user_id IS NULL`, for seed deduplication)
   - `user_id` (for custom exercise queries)
   - `name` (for search)
 

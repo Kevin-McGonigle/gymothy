@@ -7,9 +7,8 @@ export function buildExercise(
 ): typeof exercise.$inferInsert {
   return {
     id: faker.string.uuid(),
-    externalId: null,
     userId: null,
-    name: faker.lorem.words(3),
+    name: `${faker.lorem.words(3)} ${faker.string.nanoid(6)}`,
     type: "weight_reps",
     targetMuscles: [faker.lorem.word()],
     bodyParts: [faker.lorem.word()],
