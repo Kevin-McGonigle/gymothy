@@ -5,15 +5,15 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { user, userPreference } from "@/lib/db/schema";
 
+import { AuthError } from "./errors";
 import {
-  AuthError,
   getSession,
   getUserPreferences,
   signIn,
   signOut,
   signUp,
   updateUserPreferences,
-} from "./index";
+} from "./operations";
 
 let mockHeaders = new Headers();
 vi.mock("next/headers", () => ({
@@ -26,7 +26,7 @@ beforeAll(async () => {
   testHelpers = ctx.test;
 });
 
-describe("auth module", () => {
+describe("auth operations", () => {
   describe("signUp", () => {
     it("should create a user and default preferences on sign-up", async () => {
       const result = await signUp({
