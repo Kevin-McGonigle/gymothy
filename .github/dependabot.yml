@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+    groups:
+      minor-patch-updates:
+        update-types:
+          - "minor"
+          - "patch"
