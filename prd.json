@@ -360,7 +360,7 @@
             "If this task exceeds context limits, split at read path (create/get/list) vs. write path (add exercise/update targets/delete)."
           ],
           "dependencies": ["TASK-010"],
-          "completed": false
+          "completed": true
         },
         {
           "id": "TASK-014",
@@ -400,6 +400,8 @@
             "Delete action with confirmation removes routine and redirects to /routines.",
             "Server actions validate session, call routines module, revalidate/redirect. No business logic in actions. Server actions that accept pagination inputs (offset/limit) must validate and clamp them before passing to module functions (e.g., limit clamped to 1–100, offset >= 0).",
             "Component tests for builder form interactions and detail view rendering.",
+            "Server action for getRoutineById must enforce ownership (session userId check) before returning data. The module function is intentionally unscoped (consistent with getExerciseById); authorization is enforced at the action layer.",
+            "Enrich RoutineExerciseDTO with exercise name and type by extending the getRoutineById query to include the exercise relation. This avoids cross-module joins in every consumer.",
             "If this task exceeds context limits, split into: (a) /routines list + /routines/[id] detail, (b) /routines/new builder."
           ],
           "dependencies": ["TASK-013", "TASK-014"],
@@ -755,6 +757,7 @@
             "Sets can be added to or removed from any exercise in the builder.",
             "Template note can be added to the routine and is visible on the detail view.",
             "Routines module updated with reorderGroups, createSuperset, updateRoutine, addSet, removeSet, updateNote functions.",
+            "Extract ownership-resolution helpers (e.g., getRoutineIdForSet, getRoutineIdForGroup) to avoid duplicating traversal queries across the new child-entity mutation functions.",
             "Integration tests for all new module functions. Component tests for drag reorder and superset UI.",
             "If this task exceeds context limits, split into: (a) edit routine + add/remove sets + notes, (b) drag reorder, (c) supersets."
           ],

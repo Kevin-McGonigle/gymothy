@@ -29,6 +29,20 @@
   3. Optimistic local mutations, sync only on finish (simplest, highest data-loss risk).
 - **Constraints:** localStorage prevents tab-sleep data loss (Decision 5). Server persistence prevents cross-device/clear-cache data loss. Both are needed.
 
+### Transaction Boundaries for Multi-Step Mutations
+
+- **Status:** Deferred — revisit if migrating away from SQLite.
+- **Context:** `addExerciseToRoutine` performs three sequential inserts (group, exercise, set) without a transaction. A failure mid-way could leave orphan rows. `db.transaction()` in LibSQL's in-memory test client creates a separate connection that can't see the test schema, making transactions untestable in the current setup.
+- **Current mitigation:** SQLite serializes all writes (single-writer), so concurrent interleaving is impossible. Orphan risk is crash-only. Cascading deletes on the parent routine clean up any orphans when the routine is deleted.
+- **Action needed if:** Moving to Postgres (multi-writer) or adding batch mutation operations.
+
+### FK Violation Wrapping as Domain Errors
+
+- **Status:** Deferred — revisit when adding transaction boundaries.
+- **Context:** `addExerciseToRoutine` does not validate that `exerciseId` exists before inserting. An invalid ID produces a raw SQLite FK constraint error instead of a domain error like `ExerciseNotFoundError`. The test suite documents this behavior (the insert throws) but the error type is opaque.
+- **Current mitigation:** Server actions will validate inputs before calling the module. The FK constraint prevents data corruption regardless.
+- **Action needed if:** Adding transaction boundaries (catch + rethrow becomes natural inside the transaction block).
+
 ### Cardio/Machine Exercise Tracking — Resistance Component
 
 - **Status:** Unresolved — revisit during workout feature implementation.
